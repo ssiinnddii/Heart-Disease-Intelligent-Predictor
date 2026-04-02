@@ -1,0 +1,73 @@
+{
+  "numeric_features": [
+    "age",
+    "trestbps",
+    "chol",
+    "thalch",
+    "oldpeak",
+    "ca"
+  ],
+  "categorical_features": [
+    "sex",
+    "cp",
+    "fbs",
+    "restecg",
+    "exang",
+    "slope",
+    "thal"
+  ],
+  "all_features": [
+    "age",
+    "trestbps",
+    "chol",
+    "thalch",
+    "oldpeak",
+    "ca",
+    "sex",
+    "cp",
+    "fbs",
+    "restecg",
+    "exang",
+    "slope",
+    "thal"
+  ],
+  "categories": {
+    "sex": [
+      "Female",
+      "Male"
+    ],
+    "cp": [
+      "asymptomatic",
+      "atypical angina",
+      "non-anginal",
+      "typical angina"
+    ],
+    "fbs": [
+      "False",
+      "True"
+    ],
+    "restecg": [
+      "lv hypertrophy",
+      "normal",
+      "st-t abnormality"
+    ],
+    "exang": [
+      "False",
+      "True"
+    ],
+    "slope": [
+      "downsloping",
+      "flat",
+      "upsloping"
+    ],
+    "thal": [
+      "fixed defect",
+      "normal",
+      "reversable defect"
+    ]
+  },
+  "metrics": {
+    "f1_score": 0.872,
+    "roc_auc": 0.9173
+  }
+}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}HeartPredict – About{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:820px">
+
+  <h2 class="fw-bold mb-1">
+    <i class="bi bi-info-circle text-primary me-2"></i>About This Project
+  </h2>
+  <p class="text-muted mb-5">
+    How the model was built, what tech powers the site, and what each feature means.
+  </p>
+
+  <!-- Model card -->
+  <div class="card mb-4 p-4">
+    <h4 class="fw-bold mb-3">🤖 Machine Learning Pipeline</h4>
+    <p>
+      The model is a <strong>scikit-learn Pipeline</strong> that chains preprocessing
+      and classification into a single, serialisable object.  Using a Pipeline means
+      the exact same transformations applied during training are automatically applied
+      at inference time – preventing data leakage and keeping training and serving
+      consistent.
+    </p>
+
+    <div class="row g-3 mt-1">
+      <div class="col-md-4">
+        <div class="bg-light rounded p-3">
+          <div class="fw-semibold mb-1">Step 1 – Numeric preprocessing</div>
+          <small class="text-muted">
+            Median imputation (for missing values) → Standard scaling (mean=0, std=1)
+          </small>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="bg-light rounded p-3">
+          <div class="fw-semibold mb-1">Step 2 – Categorical preprocessing</div>
+          <small class="text-muted">
+            Mode imputation → Ordinal encoding (safe for tree models)
+          </small>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="bg-light rounded p-3">
+          <div class="fw-semibold mb-1">Step 3 – Gradient Boosting</div>
+          <small class="text-muted">
+            100 estimators, random_state=42.  Best F1 across 6 tested algorithms.
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-3 d-flex gap-3 flex-wrap">
+      <span class="badge bg-primary fs-6">F1-Score: {{ meta.metrics.f1_score }}</span>
+      <span class="badge bg-secondary fs-6">ROC-AUC: {{ meta.metrics.roc_auc }}</span>
+      <span class="badge bg-dark fs-6">920 training samples</span>
+    </div>
+  </div>
+
+  <!-- Tech stack -->
+  <div class="card mb-4 p-4">
+    <h4 class="fw-bold mb-3">🛠 Tech Stack</h4>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <h6 class="fw-semibold text-muted text-uppercase small">Backend / ML</h6>
+        <ul class="list-unstyled">
+          <li><i class="bi bi-check-circle text-success me-2"></i>Python 3.11+</li>
+          <li><i class="bi bi-check-circle text-success me-2"></i>scikit-learn Pipeline (preprocessing + model)</li>
+          <li><i class="bi bi-check-circle text-success me-2"></i>Flask (routes + Jinja2 templates)</li>
+          <li><i class="bi bi-check-circle text-success me-2"></i>SQLAlchemy + SQLite (prediction history)</li>
+          <li><i class="bi bi-check-circle text-success me-2"></i>joblib (model persistence)</li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h6 class="fw-semibold text-muted text-uppercase small">Frontend</h6>
+        <ul class="list-unstyled">
+          <li><i class="bi bi-check-circle text-success me-2"></i>Bootstrap 5 (responsive UI)</li>
+          <li><i class="bi bi-check-circle text-success me-2"></i>HTMX (dynamic form submit, no SPA needed)</li>
+          <li><i class="bi bi-check-circle text-success me-2"></i>Bootstrap Icons</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature glossary -->
+  <div class="card p-4">
+    <h4 class="fw-bold mb-3">📋 Feature Glossary</h4>
+    <div class="table-responsive">
+      <table class="table table-sm table-striped">
+        <thead class="table-light">
+          <tr><th>Feature</th><th>Description</th><th>Type</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>age</code></td><td>Age in years</td><td>Numeric</td></tr>
+          <tr><td><code>sex</code></td><td>Biological sex (Male / Female)</td><td>Categorical</td></tr>
+          <tr><td><code>cp</code></td><td>Chest pain type (asymptomatic, typical angina, atypical angina, non-anginal)</td><td>Categorical</td></tr>
+          <tr><td><code>trestbps</code></td><td>Resting blood pressure (mm Hg)</td><td>Numeric</td></tr>
+          <tr><td><code>chol</code></td><td>Serum cholesterol (mg/dl)</td><td>Numeric</td></tr>
+          <tr><td><code>fbs</code></td><td>Fasting blood sugar &gt; 120 mg/dl (True/False)</td><td>Categorical</td></tr>
+          <tr><td><code>restecg</code></td><td>Resting ECG results</td><td>Categorical</td></tr>
+          <tr><td><code>thalch</code></td><td>Maximum heart rate achieved (bpm)</td><td>Numeric</td></tr>
+          <tr><td><code>exang</code></td><td>Exercise-induced angina (True/False)</td><td>Categorical</td></tr>
+          <tr><td><code>oldpeak</code></td><td>ST depression induced by exercise relative to rest</td><td>Numeric</td></tr>
+          <tr><td><code>slope</code></td><td>Slope of peak exercise ST segment (upsloping / flat / downsloping)</td><td>Categorical</td></tr>
+          <tr><td><code>ca</code></td><td>Number of major vessels coloured by fluoroscopy (0–3)</td><td>Numeric</td></tr>
+          <tr><td><code>thal</code></td><td>Thalassemia (normal / fixed defect / reversable defect)</td><td>Categorical</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

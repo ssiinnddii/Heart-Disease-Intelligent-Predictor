@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}HeartPredict – Result{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:720px">
+
+  {% include "_result_card.html" %}
+
+  <div class="mt-4 d-flex gap-3">
+    <a href="{{ url_for('predict') }}" class="btn btn-outline-primary">
+      <i class="bi bi-arrow-left me-1"></i>New Assessment
+    </a>
+    <a href="{{ url_for('history') }}" class="btn btn-outline-secondary">
+      <i class="bi bi-clock-history me-1"></i>View History
+    </a>
+  </div>
+
+</div>
+{% endblock %}
