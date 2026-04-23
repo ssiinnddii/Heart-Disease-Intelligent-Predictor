@@ -2,16 +2,37 @@
 {% block title %}HeartPredict – Predict{% endblock %}
 
 {% block extra_head %}
+  <style>
+    .hero-predict {
+      position: relative;
+      background: url("{{ url_for('static', filename='images/heart-bg.png') }}") center/cover no-repeat;
+      color: #fff;
+      padding: 4rem 0 3rem;
+    }
+    .hero-predict::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(26, 115, 232, 0.85), rgba(13, 71, 161, 0.85));
+    }
+    .hero-predict .container { position: relative; z-index: 1; }
+  </style>
   <!-- HTMX – lets us submit the form and swap the result without a full page reload -->
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 {% endblock %}
 
 {% block content %}
+<!-- Hero Section -->
+<div class="hero-predict">
+  <div class="container text-center">
+    <i class="bi bi-clipboard2-pulse-fill display-3 mb-3"></i>
+    <h1 class="fw-bold">Start Your Heart Health Assessment</h1>
+    <p class="lead mb-0">Enter your clinical measurements to receive an AI-powered risk assessment</p>
+  </div>
+</div>
+
 <div class="container py-5" style="max-width:780px">
 
-  <h2 class="fw-bold mb-1">
-    <i class="bi bi-clipboard2-pulse text-primary me-2"></i>Risk Assessment Form
-  </h2>
   <p class="text-muted mb-4">
     Fill in the 13 clinical measurements below and click <strong>Predict</strong>.
     Fields marked <span class="text-danger">*</span> are required; others use
@@ -35,21 +56,21 @@
 
     <!-- ── Section 1: Demographics ── -->
     <div class="card mb-4 p-4">
-      <div class="section-header">Demographics</div>
+      <div class="section-header">About You</div>
       <div class="row g-3">
 
         <div class="col-md-4">
           <label class="form-label fw-semibold" for="age">
-            Age (years) <span class="text-danger">*</span>
+            What's your age? <span class="text-danger">*</span>
           </label>
           <input type="number" class="form-control" id="age" name="age"
                  min="18" max="100" placeholder="e.g. 55" required />
-          <div class="form-text">Typical range: 28 – 77</div>
+          <div class="form-text">Typical range: 28 – 77 years</div>
         </div>
 
         <div class="col-md-4">
           <label class="form-label fw-semibold" for="sex">
-            Sex <span class="text-danger">*</span>
+            What's your sex? <span class="text-danger">*</span>
           </label>
           <select class="form-select" id="sex" name="sex" required>
             <option value="" disabled selected>Choose…</option>
@@ -61,7 +82,7 @@
 
         <div class="col-md-4">
           <label class="form-label fw-semibold" for="cp">
-            Chest Pain Type <span class="text-danger">*</span>
+            What type of chest pain do you experience? <span class="text-danger">*</span>
           </label>
           <select class="form-select" id="cp" name="cp" required>
             <option value="" disabled selected>Choose…</option>
@@ -69,6 +90,7 @@
               <option value="{{ opt }}">{{ opt }}</option>
             {% endfor %}
           </select>
+          <div class="form-text">Chest pain during physical activity or rest</div>
         </div>
 
       </div>
@@ -76,12 +98,12 @@
 
     <!-- ── Section 2: Vital Signs ── -->
     <div class="card mb-4 p-4">
-      <div class="section-header">Vital Signs &amp; Lab Results</div>
+      <div class="section-header">Health Measurements</div>
       <div class="row g-3">
 
         <div class="col-md-4">
           <label class="form-label fw-semibold" for="trestbps">
-            Resting Blood Pressure
+            What's your resting blood pressure?
           </label>
           <div class="input-group">
             <input type="number" class="form-control" id="trestbps" name="trestbps"
@@ -91,7 +113,7 @@
         </div>
 
         <div class="col-md-4">
-          <label class="form-label fw-semibold" for="chol">Cholesterol</label>
+          <label class="form-label fw-semibold" for="chol">What's your cholesterol level?</label>
           <div class="input-group">
             <input type="number" class="form-control" id="chol" name="chol"
                    min="0" max="700" placeholder="e.g. 220" />
@@ -101,7 +123,7 @@
 
         <div class="col-md-4">
           <label class="form-label fw-semibold" for="fbs">
-            Fasting Blood Sugar &gt; 120 mg/dl <span class="text-danger">*</span>
+            Have you been diagnosed with diabetes? <span class="text-danger">*</span>
           </label>
           <select class="form-select" id="fbs" name="fbs" required>
             <option value="" disabled selected>Choose…</option>
@@ -109,11 +131,12 @@
               <option value="{{ opt }}">{{ opt }}</option>
             {% endfor %}
           </select>
+          <div class="form-text">Fasting blood sugar &gt; 120 mg/dl</div>
         </div>
 
         <div class="col-md-4">
           <label class="form-label fw-semibold" for="thalch">
-            Max Heart Rate
+            What's your maximum heart rate during exercise?
           </label>
           <div class="input-group">
             <input type="number" class="form-control" id="thalch" name="thalch"
@@ -124,19 +147,20 @@
 
         <div class="col-md-4">
           <label class="form-label fw-semibold" for="oldpeak">
-            ST Depression (Oldpeak)
+            Have you experienced ST depression during exercise?
           </label>
           <input type="number" step="0.1" class="form-control" id="oldpeak"
                  name="oldpeak" min="-5" max="7" placeholder="e.g. 1.0" />
-          <div class="form-text">Exercise-induced ST depression</div>
+          <div class="form-text">Heart response to exercise</div>
         </div>
 
         <div class="col-md-4">
           <label class="form-label fw-semibold" for="ca">
-            Major Vessels (Fluoroscopy)
+            How many major blood vessels show narrowing?
           </label>
           <input type="number" class="form-control" id="ca" name="ca"
                  min="0" max="3" placeholder="0 – 3" />
+          <div class="form-text">Checked via fluoroscopy</div>
         </div>
 
       </div>
@@ -144,12 +168,12 @@
 
     <!-- ── Section 3: Diagnostic ── -->
     <div class="card mb-4 p-4">
-      <div class="section-header">Diagnostic Findings</div>
+      <div class="section-header">Heart Function Tests</div>
       <div class="row g-3">
 
         <div class="col-md-6">
           <label class="form-label fw-semibold" for="restecg">
-            Resting ECG Results <span class="text-danger">*</span>
+            What does your resting ECG show? <span class="text-danger">*</span>
           </label>
           <select class="form-select" id="restecg" name="restecg" required>
             <option value="" disabled selected>Choose…</option>
@@ -161,7 +185,7 @@
 
         <div class="col-md-6">
           <label class="form-label fw-semibold" for="exang">
-            Exercise-Induced Angina <span class="text-danger">*</span>
+            Do you get chest pain during exercise? <span class="text-danger">*</span>
           </label>
           <select class="form-select" id="exang" name="exang" required>
             <option value="" disabled selected>Choose…</option>
@@ -173,7 +197,7 @@
 
         <div class="col-md-6">
           <label class="form-label fw-semibold" for="slope">
-            ST Slope <span class="text-danger">*</span>
+            What's your ST segment slope during exercise? <span class="text-danger">*</span>
           </label>
           <select class="form-select" id="slope" name="slope" required>
             <option value="" disabled selected>Choose…</option>
@@ -185,7 +209,7 @@
 
         <div class="col-md-6">
           <label class="form-label fw-semibold" for="thal">
-            Thalassemia <span class="text-danger">*</span>
+            Have you been diagnosed with thalassemia? <span class="text-danger">*</span>
           </label>
           <select class="form-select" id="thal" name="thal" required>
             <option value="" disabled selected>Choose…</option>

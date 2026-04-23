@@ -31,7 +31,7 @@ import requests
 import joblib
 import numpy as np
 import pandas as pd
-import shap  
+#import shap  
 
 from flask import (Flask, jsonify, render_template, request,
                    redirect, url_for, flash)
@@ -39,9 +39,37 @@ from flask_sqlalchemy import SQLAlchemy
 
 
 def get_heart_news():
-    api_key = os.getenv("NEWS_API_KEY")  # set this in your environment
+    try:
+        import feedparser
+        rss_feeds = [
+            "https://www.medicalnewstoday/rss/category/heart-disease/rss.xml",
+            "https://feeds.feedburner.com/healthline/heart-disease"
+        ]
+        
+        articles = []
+        for feed_url in rss_feeds:
+            try:
+                feed = feedparser.parse(feed_url)
+                for entry in feed.entries[:3]:
+                    articles.append({
+                        "title": entry.get("title", "Heart Health News"),
+                        "url": entry.get("link", "#"),
+                        "image": None,
+                        "description": entry.get("summary", "Read the latest update on heart health and cardiovascular research.")[:200],
+                        "source": feed.feed.get("title", "Health News"),
+                        "published_at": entry.get("published", "")[:10] if entry.get("published") else ""
+                    })
+            except Exception:
+                continue
+        
+        if articles:
+            return articles[:6]
+    except ImportError:
+        pass
+
+    api_key = os.getenv("NEWS_API_KEY")
     if not api_key:
-        return []
+        return get_fallback_news()
 
     url = "https://newsapi.org/v2/everything"
     params = {
@@ -83,7 +111,61 @@ def get_heart_news():
         return cleaned_articles
 
     except requests.RequestException:
-        return []
+        return get_fallback_news()
+
+
+def get_fallback_news():
+    """Return curated heart health articles when no API is available."""
+    return [
+        {
+            "title": "Understanding Heart Disease: Risk Factors and Prevention",
+            "url": "https://www.cdc.gov/heartdisease/risk_factors.htm",
+            "image": "https://images.unsplash.com/photo-1559757175-5700dde675bc?w=600&h=400&fit=crop",
+            "description": "Learn about the major risk factors for heart disease and steps you can take to protect your heart health.",
+            "source": "CDC",
+            "published_at": "2024-01-15"
+        },
+        {
+            "title": "New Guidelines for Managing High Blood Pressure",
+            "url": "https://www.heart.org/en/health-topics/high-blood-pressure",
+            "image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&h=400&fit=crop",
+            "description": "American Heart Association releases updated guidelines for preventing and managing hypertension.",
+            "source": "American Heart Association",
+            "published_at": "2024-02-01"
+        },
+        {
+            "title": "The Role of Diet and Exercise in Heart Health",
+            "url": "https://www.nhlbi.nih.gov/health/heart-healthy-living",
+            "image": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&h=400&fit=crop",
+            "description": "Discover how lifestyle changes can significantly reduce your risk of developing heart disease.",
+            "source": "NHLBI",
+            "published_at": "2024-01-20"
+        },
+        {
+            "title": "Cholesterol and Heart Disease: What You Need to Know",
+            "url": "https://www.mayoclinic.org/diseases-conditions/high-blood-cholesterol",
+            "image": "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=600&h=400&fit=crop",
+            "description": "Understanding cholesterol levels and how to manage them for better heart health.",
+            "source": "Mayo Clinic",
+            "published_at": "2024-02-10"
+        },
+        {
+            "title": "Warning Signs of Heart Attack You Shouldn't Ignore",
+            "url": "https://www.heart.org/en/health-topics/heart-attack",
+            "image": "https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?w=600&h=400&fit=crop",
+            "description": "Know the warning signs of a heart attack and when to seek emergency medical care.",
+            "source": "American Heart Association",
+            "published_at": "2024-01-25"
+        },
+        {
+            "title": "The Connection Between Stress and Heart Health",
+            "url": "https://www.apa.org/topics/stress/body",
+            "image": "https://images.unsplash.com/photo-1499728603263-13726abce5fd?w=600&h=400&fit=crop",
+            "description": "Research shows how chronic stress can impact your cardiovascular system and what you can do about it.",
+            "source": "APA",
+            "published_at": "2024-02-05"
+        }
+    ]
     
 # ── app setup ──────────────────────────────────────────────────────────────
 app = Flask(__name__)
@@ -101,6 +183,7 @@ db = SQLAlchemy(app)
 # ── load model & metadata ─────────────────────────────────────────────────
 PIPELINE_PATH = BASE_DIR / "models" / "heart_disease_model.pkl"
 META_PATH     = BASE_DIR / "models" / "meta.json"
+DATA_PATH     = BASE_DIR / "heart_disease_uci.csv"
 
 pipeline = None   # loaded lazily on first request (faster startup)
 meta     = {}
@@ -164,26 +247,34 @@ def risk_label(prob: float) -> str:
 
 
 def parse_form(form_data: dict) -> pd.DataFrame:
-    """
-    Convert raw form/JSON values into a single-row DataFrame
-    that matches the feature names the pipeline was trained on.
-    """
-    _, m = get_pipeline()
+    pipe, m = get_pipeline()
     row = {}
 
-    # numeric fields
     for feat in m["numeric_features"]:
         raw = form_data.get(feat, "")
         try:
             row[feat] = float(raw)
         except (ValueError, TypeError):
-            row[feat] = np.nan     # imputer will fill with training median
+            row[feat] = np.nan
 
-    # categorical fields – keep as strings
     for feat in m["categorical_features"]:
-        row[feat] = str(form_data.get(feat, "")).strip()
+        raw = str(form_data.get(feat, "")).strip()
+        # Encode categorical string to numeric (0, 1, 2, ...) using meta categories
+        cats = m["categories"].get(feat, [])
+        if raw in cats:
+            row[feat] = cats.index(raw)
+        else:
+            row[feat] = -1  # Unknown category
 
-    return pd.DataFrame([row], columns=m["all_features"])
+    df = pd.DataFrame([row])
+
+    # Reorder columns to exactly match training order
+    if hasattr(pipe, "feature_names_in_"):
+        df = df[pipe.feature_names_in_]
+    else:
+        df = df[m["all_features"]]
+
+    return df
 
 
 # ── routes ────────────────────────────────────────────────────────────────

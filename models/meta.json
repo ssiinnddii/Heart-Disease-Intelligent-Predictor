@@ -18,17 +18,17 @@
   ],
   "all_features": [
     "age",
-    "trestbps",
-    "chol",
-    "thalch",
-    "oldpeak",
-    "ca",
     "sex",
     "cp",
+    "trestbps",
+    "chol",
     "fbs",
     "restecg",
+    "thalch",
     "exang",
+    "oldpeak",
     "slope",
+    "ca",
     "thal"
   ],
   "categories": {
