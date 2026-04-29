@@ -1,0 +1,35 @@
+{% set labels = {
+  'age': 'Age', 'sex': 'Sex', 'cp': 'Chest Pain Type',
+  'trestbps': 'Resting BP (mm Hg)', 'chol': 'Cholesterol (mg/dl)',
+  'fbs': 'Fasting Blood Sugar', 'restecg': 'Resting ECG',
+  'thalch': 'Max Heart Rate (bpm)', 'exang': 'Exercise Angina',
+  'oldpeak': 'ST Depression', 'slope': 'ST Slope',
+  'ca': 'Major Vessels', 'thal': 'Thalassemia'
+} %}
+
+<div class="text-center mb-3">
+  <span class="badge fs-6 risk-{{ record.risk_level }}">{{ record.risk_level }} Risk</span>
+  <h5 class="fw-bold mt-2 mb-1">
+    {% if record.prediction == 1 %}Heart Disease Detected{% else %}No Heart Disease Detected{% endif %}
+  </h5>
+  <p class="text-muted mb-0">{{ record.probability }}% risk probability</p>
+  <small class="text-muted">Assessed on {{ record.created_at }}</small>
+</div>
+
+<hr>
+
+<h6 class="fw-bold mb-3">
+  <i class="bi bi-clipboard-data me-2 text-primary"></i>Measurements Used
+</h6>
+
+{% set inputs = record.input_data %}
+<div class="row g-2">
+  {% for key, label in labels.items() %}
+    <div class="col-6">
+      <div class="bg-light rounded p-2">
+        <div class="small text-muted">{{ label }}</div>
+        <div class="fw-semibold">{{ inputs.get(key, '\u2014') or '\u2014' }}</div>
+      </div>
+    </div>
+  {% endfor %}
+</div>

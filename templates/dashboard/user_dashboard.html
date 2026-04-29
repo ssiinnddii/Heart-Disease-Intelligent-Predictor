@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard - HeartPredict{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row mb-4">
+    <div class="col">
+      <h2><i class="bi bi-person-circle me-2"></i>Welcome, {{ current_user.username }}</h2>
+      <p class="text-muted">Patient Dashboard - Manage your heart health predictions</p>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="text-primary">{{ stats.total }}</h3>
+          <p class="text-muted mb-0">Total Assessments</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="text-danger">{{ stats.high_risk }}</h3>
+          <p class="text-muted mb-0">High Risk</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="text-warning">{{ stats.medium_risk }}</h3>
+          <p class="text-muted mb-0">Medium Risk</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="text-success">{{ stats.low_risk }}</h3>
+          <p class="text-muted mb-0">Low Risk</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <a href="{{ url_for('predict') }}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <i class="bi bi-clipboard2-pulse text-primary" style="font-size: 2.5rem;"></i>
+            <h5 class="mt-3">New Assessment</h5>
+            <p class="text-muted">Start a new heart health prediction</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4 mb-3">
+      <a href="{{ url_for('history') }}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <i class="bi bi-clock-history text-info" style="font-size: 2.5rem;"></i>
+            <h5 class="mt-3">View History</h5>
+            <p class="text-muted">See all your past predictions</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4 mb-3">
+      <a href="{{ url_for('about') }}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <i class="bi bi-info-circle text-secondary" style="font-size: 2.5rem;"></i>
+            <h5 class="mt-3">Learn More</h5>
+            <p class="text-muted">About the prediction model</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Your Recent Predictions</h5>
+        </div>
+        <div class="card-body">
+          {% if records %}
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Risk Level</th>
+                  <th>Probability</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for record in records[:10] %}
+                <tr>
+                  <td>{{ record.created_at }}</td>
+                  <td><span class="badge risk-{{ record.risk_level }}">{{ record.risk_level }}</span></td>
+                  <td>{{ record.probability }}%</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary view-prediction-btn"
+                            data-prediction-id="{{ record.id }}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#predictionModal">
+                      View
+                    </button>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted text-center py-4 mb-0">No predictions yet. <a href="{{ url_for('predict') }}">Start your first assessment</a></p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Prediction Detail Modal -->
+<div class="modal fade" id="predictionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-clipboard2-pulse me-2 text-primary"></i>Assessment Details
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="predictionModalBody">
+        <div class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading…</span>
+          </div>
+          <p class="text-muted mt-2 mb-0">Loading assessment…</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var modal = document.getElementById('predictionModal');
+  modal.addEventListener('show.bs.modal', function(event) {
+    var button = event.relatedTarget;
+    var predictionId = button.getAttribute('data-prediction-id');
+    var body = document.getElementById('predictionModalBody');
+    body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading…</span></div><p class="text-muted mt-2 mb-0">Loading assessment…</p></div>';
+    fetch('/dashboard/prediction/' + predictionId, {
+      headers: {'HX-Request': 'true'}
+    })
+    .then(function(res) { return res.text(); })
+    .then(function(html) { body.innerHTML = html; })
+    .catch(function() { body.innerHTML = '<p class="text-danger text-center">Failed to load details.</p>'; });
+  });
+});
+</script>
+{% endblock %}
+{% endblock %}

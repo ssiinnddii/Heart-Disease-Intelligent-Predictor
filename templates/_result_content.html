@@ -1,0 +1,189 @@
+<style>
+  .shap-bar-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    gap: 0.5rem;
+  }
+  .shap-label {
+    min-width: 170px;
+    max-width: 170px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.3;
+    flex-shrink: 0;
+  }
+  .shap-bar-track {
+    flex: 1;
+    height: 1.3rem;
+    background: #e9ecef;
+    border-radius: 0.4rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .shap-bar {
+    height: 100%;
+    border-radius: 0.4rem;
+    transition: width 0.6s ease;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #fff;
+    min-width: 2rem;
+  }
+  .shap-bar.increases {
+    background: linear-gradient(90deg, #c0392b, #e74c3c);
+  }
+  .shap-bar.decreases {
+    background: linear-gradient(90deg, #1abc9c, #2ecc71);
+  }
+  .shap-legend {
+    display: flex;
+    gap: 1.25rem;
+    justify-content: center;
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+  }
+  .shap-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .shap-legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+  @media (max-width: 576px) {
+    .shap-label {
+      min-width: 110px;
+      max-width: 110px;
+      font-size: 0.75rem;
+    }
+  }
+</style>
+
+<!-- Risk banner -->
+<div class="card border-0 text-center p-4
+  {% if result.risk_level == 'Low' %}bg-success bg-opacity-10 border border-success{% endif %}
+  {% if result.risk_level == 'Medium' %}bg-warning bg-opacity-10 border border-warning{% endif %}
+  {% if result.risk_level == 'High' %}bg-danger bg-opacity-10 border border-danger{% endif %}
+">
+  <div class="display-5 mb-2">
+    {% if result.risk_level == 'Low' %}
+      <i class="bi bi-shield-check text-success"></i>
+    {% elif result.risk_level == 'Medium' %}
+      <i class="bi bi-exclamation-triangle text-warning"></i>
+    {% else %}
+      <i class="bi bi-x-octagon text-danger"></i>
+    {% endif %}
+  </div>
+
+  <h3 class="fw-bold mb-1">
+    {% if result.prediction == 1 %}
+      Heart Disease Detected
+    {% else %}
+      No Heart Disease Detected
+    {% endif %}
+  </h3>
+
+  <p class="mb-3 text-muted">
+    Risk Level:
+    <span class="badge fs-6 risk-{{ result.risk_level }}">{{ result.risk_level }} Risk</span>
+  </p>
+
+  <div class="mx-auto" style="max-width:420px">
+    <div class="d-flex justify-content-between mb-1 small text-muted">
+      <span>0%</span>
+      <span class="fw-bold text-dark">{{ result.probability }}% risk</span>
+      <span>100%</span>
+    </div>
+    <div class="progress" style="height:1rem; border-radius:.5rem;">
+      <div class="progress-bar
+        {% if result.risk_level == 'Low' %}bg-success{% elif result.risk_level == 'Medium' %}bg-warning{% else %}bg-danger{% endif %}"
+        role="progressbar"
+        style="width:{{ result.probability }}%"
+        aria-valuenow="{{ result.probability }}" aria-valuemin="0" aria-valuemax="100">
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if shap_explanation %}
+<!-- Feature Impact -->
+<div class="card border-0 shadow-sm mt-3">
+  <div class="card-body p-4">
+    <h5 class="fw-bold mb-1">
+      <i class="bi bi-bar-chart-fill me-2 text-primary"></i>What Influenced This Result
+    </h5>
+    <p class="text-muted small mb-3">
+      Factors that pushed your result higher or lower, ranked by strength.
+    </p>
+
+    {% set max_abs = shap_explanation[0].abs_shap_value if shap_explanation else 1 %}
+    {% for item in shap_explanation[:7] %}
+    {% set width_pct = (item.abs_shap_value / max_abs * 100) | round(1) %}
+    <div class="shap-bar-container">
+      <div class="shap-label">{{ item.display_name }}</div>
+      <div class="shap-bar-track">
+        <div class="shap-bar {{ item.direction }}" style="width: {{ [width_pct, 10] | max }}%">
+          {% if item.direction == "increases" %}Increases Risk{% else %}Lowers Risk{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+    <div class="shap-legend">
+      <div class="shap-legend-item">
+        <div class="shap-legend-dot" style="background: #e74c3c;"></div>
+        <span>Pushed risk up</span>
+      </div>
+      <div class="shap-legend-item">
+        <div class="shap-legend-dot" style="background: #2ecc71;"></div>
+        <span>Pushed risk down</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Input Summary -->
+<div class="card border-0 shadow-sm mt-3">
+  <div class="card-body p-4">
+    <h5 class="fw-bold mb-3">
+      <i class="bi bi-clipboard-data me-2 text-primary"></i>Your Measurements
+    </h5>
+    {% set labels = {
+      'age': 'Age', 'sex': 'Sex', 'cp': 'Chest Pain Type',
+      'trestbps': 'Resting BP (mm Hg)', 'chol': 'Cholesterol (mg/dl)',
+      'fbs': 'Fasting Blood Sugar', 'restecg': 'Resting ECG',
+      'thalch': 'Max Heart Rate (bpm)', 'exang': 'Exercise Angina',
+      'oldpeak': 'ST Depression', 'slope': 'ST Slope',
+      'ca': 'Major Vessels', 'thal': 'Thalassemia'
+    } %}
+    <div class="row g-2">
+      {% for feat in meta.all_features %}
+        <div class="col-6 col-md-4">
+          <div class="bg-light rounded p-2">
+            <div class="small text-muted">{{ labels.get(feat, feat) }}</div>
+            <div class="fw-semibold">
+              {{ inputs.get(feat, '\u2014') or '\u2014' }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Disclaimer -->
+<div class="alert alert-warning mt-3 mb-0 d-flex gap-2 align-items-start" role="alert">
+  <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+  <small>
+    This result is for <strong>educational purposes only</strong> and does not replace a professional medical diagnosis.
+    Consult a healthcare provider for an accurate evaluation of your heart health.
+  </small>
+</div>

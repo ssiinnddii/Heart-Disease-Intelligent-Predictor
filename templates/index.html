@@ -53,76 +53,283 @@
 </div>
 
 <!-- Heart health info section -->
+<style>
+  .quick-facts-bar {
+    background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+    border-radius: 1rem;
+    color: #fff;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+  }
+  .quick-facts-bar h5 {
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+  }
+  .quick-facts-bar ul {
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+  .quick-facts-bar li {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+    opacity: 0.95;
+  }
+
+  .risk-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+  }
+  .risk-table thead th {
+    background: #343a40;
+    color: #fff;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    padding: 0.85rem 1rem;
+    border: none;
+  }
+  .risk-table tbody td {
+    padding: 0.85rem 1rem;
+    font-size: 0.9rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #e9ecef;
+  }
+  .risk-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  .risk-row-low     { background: #d4edda; }
+  .risk-row-moderate { background: #fff3cd; }
+  .risk-row-medium   { background: #ffe0b2; }
+  .risk-row-high     { background: #f8a9a9; }
+  .risk-row-very-high { background: #dc3545; color: #fff; }
+
+  .risk-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .risk-badge-low       { background: #28a745; color: #fff; }
+  .risk-badge-moderate  { background: #ffc107; color: #212529; }
+  .risk-badge-medium    { background: #fd7e14; color: #fff; }
+  .risk-badge-high      { background: #dc3545; color: #fff; }
+  .risk-badge-very-high { background: #6c0000; color: #fff; }
+
+  .info-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6c757d;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 0.4rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
 <div class="container mt-5">
+
+  <!-- Quick Facts Bar -->
+  <div class="quick-facts-bar">
+    <h5><i class="bi bi-lightning-fill me-2"></i>Quick Facts</h5>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <ul>
+          <li>Heart disease is the leading cause of death globally, responsible for an estimated 17.9 million deaths each year.</li>
+          <li>Up to 80% of premature heart disease and strokes are preventable through lifestyle changes.</li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <ul>
+          <li>Many heart conditions show no symptoms until serious damage has already occurred.</li>
+          <li>Regular screening and risk assessment can detect problems early when they are most treatable.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content card -->
   <div class="card border-0 shadow-sm p-4 p-md-5">
-    <div class="row align-items-center g-4">
-      <div class="col-lg-8">
-        <span class="badge bg-light text-primary border mb-3 px-3 py-2">
-          <i class="bi bi-heart-pulse me-1"></i> Heart Health Information
-        </span>
-        <h2 class="fw-bold mb-3">Understanding Heart Health</h2>
-        <p class="text-muted mb-3">
-          The heart is a muscular organ that pumps blood throughout the body, delivering oxygen and nutrients
-          to tissues and removing waste products. Keeping your heart healthy is essential for overall wellbeing.
-        </p>
-        <p class="text-muted mb-0">
-          Heart disease is a broad term that includes several conditions affecting the heart and blood vessels.
-          Risk may increase due to factors such as high blood pressure, high cholesterol, diabetes, smoking,
-          physical inactivity, obesity, stress, and family history.
-        </p>
-      </div>
 
-      <div class="col-lg-4">
-        <div class="bg-light rounded-4 p-4 h-100">
-          <h5 class="fw-bold mb-3">Common Heart Conditions</h5>
-          <ul class="list-unstyled mb-0">
-            <li class="mb-2"><i class="bi bi-check-circle-fill text-primary me-2"></i> Coronary artery disease</li>
-            <li class="mb-2"><i class="bi bi-check-circle-fill text-primary me-2"></i> Heart attack</li>
-            <li class="mb-2"><i class="bi bi-check-circle-fill text-primary me-2"></i> Heart failure</li>
-            <li class="mb-2"><i class="bi bi-check-circle-fill text-primary me-2"></i> Arrhythmias</li>
-            <li class="mb-2"><i class="bi bi-check-circle-fill text-primary me-2"></i> High blood pressure</li>
-            <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Valve disease</li>
-          </ul>
+    <!-- Understanding Your Heart Disease Risk -->
+    <h3 class="fw-bold mb-3">Understanding Your Heart Disease Risk</h3>
+    <p class="text-muted mb-4">
+      Heart disease risk is influenced by a combination of factors including age, blood pressure, cholesterol,
+      chest pain type, exercise capacity, and more. Our assessment tool analyses these clinical indicators to
+      estimate your personal risk level and shows which factors contribute the most.
+    </p>
+
+    <!-- Risk Level Categories -->
+    <div class="table-responsive mb-5">
+      <table class="risk-table">
+        <thead>
+          <tr>
+            <th>Risk Level</th>
+            <th>Predicted Probability</th>
+            <th>What It Means</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="risk-row-low">
+            <td><span class="risk-badge risk-badge-low">Low Risk</span></td>
+            <td>Below 35%</td>
+            <td>Your clinical indicators suggest a lower likelihood of heart disease. Continue maintaining heart-healthy habits.</td>
+          </tr>
+          <tr class="risk-row-moderate">
+            <td><span class="risk-badge risk-badge-moderate">Moderate Risk</span></td>
+            <td>35% – 50%</td>
+            <td>Some risk factors are present. Discuss your results with a healthcare provider and consider lifestyle adjustments.</td>
+          </tr>
+          <tr class="risk-row-medium">
+            <td><span class="risk-badge risk-badge-medium">Medium Risk</span></td>
+            <td>50% – 65%</td>
+            <td>Multiple risk indicators are elevated. A medical evaluation is recommended to assess your cardiovascular health.</td>
+          </tr>
+          <tr class="risk-row-high">
+            <td><span class="risk-badge risk-badge-high">High Risk</span></td>
+            <td>65% – 80%</td>
+            <td>Significant risk factors detected. Consult a healthcare professional promptly for further cardiac evaluation.</td>
+          </tr>
+          <tr class="risk-row-very-high">
+            <td><span class="risk-badge risk-badge-very-high">Very High Risk</span></td>
+            <td>Above 80%</td>
+            <td>Strong indicators of heart disease. Seek medical attention and comprehensive cardiac testing as soon as possible.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alert alert-light border mb-4">
+      <small class="text-muted">
+        <i class="bi bi-info-circle me-1"></i>
+        <strong>Note:</strong> This assessment tool is for <em>educational purposes only</em> and does not
+        replace a professional medical diagnosis. Always consult a qualified healthcare provider for
+        an accurate evaluation of your heart health.
+      </small>
+    </div>
+
+    <!-- Key Risk Factors -->
+    <div class="mb-4">
+      <div class="info-section-title">Key Risk Factors</div>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="p-3 rounded-4 bg-light h-100">
+            <i class="bi bi-calendar3 text-primary me-2"></i>
+            <strong>Age</strong>
+            <p class="text-muted mb-0 small">Risk increases with age as arteries naturally stiffen over time.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 rounded-4 bg-light h-100">
+            <i class="bi bi-activity text-danger me-2"></i>
+            <strong>High Blood Pressure</strong>
+            <p class="text-muted mb-0 small">Forces the heart to work harder, damaging arteries over time.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 rounded-4 bg-light h-100">
+            <i class="bi bi-droplet-fill text-warning me-2"></i>
+            <strong>High Cholesterol</strong>
+            <p class="text-muted mb-0 small">Leads to plaque buildup that narrows and blocks arteries.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 rounded-4 bg-light h-100">
+            <i class="bi bi-heart-pulse-fill text-success me-2"></i>
+            <strong>Chest Pain Type</strong>
+            <p class="text-muted mb-0 small">Certain types of chest pain are strong indicators of heart disease.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 rounded-4 bg-light h-100">
+            <i class="bi bi-speedometer2 text-info me-2"></i>
+            <strong>Max Heart Rate</strong>
+            <p class="text-muted mb-0 small">Lower maximum heart rate during exercise may indicate reduced cardiac fitness.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 rounded-4 bg-light h-100">
+            <i class="bi bi-graph-down-arrow text-secondary me-2"></i>
+            <strong>ST Depression</strong>
+            <p class="text-muted mb-0 small">Abnormal ECG readings during stress testing signal potential heart issues.</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <hr class="my-4">
-
-    <div class="row g-4">
-      <div class="col-md-4">
-        <div class="h-100 p-3 rounded-4 bg-light">
-          <h6 class="fw-bold mb-2">
-            <i class="bi bi-activity text-primary me-2"></i>Key Risk Factors
-          </h6>
-          <p class="text-muted mb-0">
-            High cholesterol, high blood pressure, smoking, diabetes, obesity, unhealthy diet, and low physical activity.
-          </p>
+    <!-- Warning Signs -->
+    <div class="mb-4">
+      <div class="info-section-title">Warning Signs of Heart Disease</div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="p-3 rounded-4 bg-light h-100">
+            <ul class="list-unstyled mb-0">
+              <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Chest pain, pressure, or tightness</li>
+              <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Shortness of breath</li>
+              <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Pain radiating to arm, neck, or jaw</li>
+              <li><i class="bi bi-x-circle-fill text-danger me-2"></i>Dizziness or fainting</li>
+            </ul>
+          </div>
         </div>
-      </div>
-
-      <div class="col-md-4">
-        <div class="h-100 p-3 rounded-4 bg-light">
-          <h6 class="fw-bold mb-2">
-            <i class="bi bi-exclamation-circle text-primary me-2"></i>Common Warning Signs
-          </h6>
-          <p class="text-muted mb-0">
-            Chest pain, shortness of breath, dizziness, fatigue, palpitations, and discomfort in the arm, neck, or jaw.
-          </p>
-        </div>
-      </div>
-
-      <div class="col-md-4">
-        <div class="h-100 p-3 rounded-4 bg-light">
-          <h6 class="fw-bold mb-2">
-            <i class="bi bi-shield-check text-primary me-2"></i>Prevention Tips
-          </h6>
-          <p class="text-muted mb-0">
-            Maintain a balanced diet, exercise regularly, avoid smoking, manage stress, and monitor blood pressure and cholesterol.
-          </p>
+        <div class="col-md-6">
+          <div class="p-3 rounded-4 bg-light h-100">
+            <ul class="list-unstyled mb-0">
+              <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Unusual fatigue or weakness</li>
+              <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Irregular heartbeat or palpitations</li>
+              <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Swelling in legs, ankles, or feet</li>
+              <li><i class="bi bi-x-circle-fill text-danger me-2"></i>Nausea, cold sweats, or indigestion</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Prevention Tips -->
+    <div>
+      <div class="info-section-title">Heart-Healthy Prevention</div>
+      <div class="row g-3">
+        <div class="col-sm-6 col-lg-3">
+          <div class="p-3 rounded-4 bg-light text-center h-100">
+            <i class="bi bi-apple text-success fs-4 d-block mb-2"></i>
+            <strong class="d-block">Healthy Diet</strong>
+            <small class="text-muted">Low sodium, whole grains, fruits, and vegetables</small>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="p-3 rounded-4 bg-light text-center h-100">
+            <i class="bi bi-bicycle text-primary fs-4 d-block mb-2"></i>
+            <strong class="d-block">Regular Exercise</strong>
+            <small class="text-muted">At least 150 minutes of moderate activity per week</small>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="p-3 rounded-4 bg-light text-center h-100">
+            <i class="bi bi-bandaid text-warning fs-4 d-block mb-2"></i>
+            <strong class="d-block">Regular Screening</strong>
+            <small class="text-muted">Monitor cholesterol, BP, and blood sugar annually</small>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="p-3 rounded-4 bg-light text-center h-100">
+            <i class="bi bi-emoji-smile text-info fs-4 d-block mb-2"></i>
+            <strong class="d-block">Manage Stress</strong>
+            <small class="text-muted">Practice mindfulness, adequate rest, and work-life balance</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 

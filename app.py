@@ -1,13 +1,24 @@
 """
 app.py  –  Flask backend for the Heart Disease Prediction web app
-=================================================================
+================================================================
 
 Architecture
 ------------
-  /                → Home / landing page
-  /predict         → GET: prediction form  |  POST: JSON API endpoint
-  /history         → Table of past predictions (from SQLite via SQLAlchemy)
-  /about           → Explains the model and features
+  /                  → Home / landing page
+  /predict           → GET: prediction form  |  POST: JSON API endpoint
+  /history           → Table of past predictions (from SQLite via SQLAlchemy)
+  /about              → Explains the model and features
+
+  Authentication Routes:
+  /auth/login         → User login
+  /auth/register      → User registration
+  /auth/logout        → User logout
+
+  Dashboard Routes (protected):
+  /dashboard/         → Redirect to role-specific dashboard
+  /dashboard/user     → User dashboard
+  /dashboard/doctor   → Doctor dashboard (requires approval)
+  /dashboard/admin    → Admin dashboard
 
 The /predict endpoint accepts BOTH:
   • Regular HTML form submissions (returns rendered result page)
@@ -15,8 +26,9 @@ The /predict endpoint accepts BOTH:
 
 Run locally
 -----------
-  pip install flask flask-sqlalchemy joblib scikit-learn pandas numpy
+  pip install flask flask-sqlalchemy flask-login joblib scikit-learn pandas numpy werkzeug
   python train_pipeline.py --data heart_disease_uci.csv   # first time only
+  python seed_admin.py   # create admin user (first time only)
   python app.py
 """
 
@@ -31,12 +43,15 @@ import requests
 import joblib
 import numpy as np
 import pandas as pd
-#import shap  
 
-from flask import (Flask, jsonify, render_template, request,
-                   redirect, url_for, flash)
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
+from flask_login import login_required, current_user
 
+from models import db, User, Prediction
+from auth import init_login
+from auth_routes import auth
+from dashboard_routes import dashboard
+from shap_utils import compute_shap_explanation
 
 def get_heart_news():
     try:
@@ -45,7 +60,7 @@ def get_heart_news():
             "https://www.medicalnewstoday/rss/category/heart-disease/rss.xml",
             "https://feeds.feedburner.com/healthline/heart-disease"
         ]
-        
+
         articles = []
         for feed_url in rss_feeds:
             try:
@@ -61,7 +76,7 @@ def get_heart_news():
                     })
             except Exception:
                 continue
-        
+
         if articles:
             return articles[:6]
     except ImportError:
@@ -166,7 +181,7 @@ def get_fallback_news():
             "published_at": "2024-02-05"
         }
     ]
-    
+
 # ── app setup ──────────────────────────────────────────────────────────────
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-in-prod")
@@ -178,7 +193,11 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-db = SQLAlchemy(app)
+db.init_app(app)
+init_login(app)
+
+app.register_blueprint(auth)
+app.register_blueprint(dashboard)
 
 # ── load model & metadata ─────────────────────────────────────────────────
 PIPELINE_PATH = BASE_DIR / "models" / "heart_disease_model.pkl"
@@ -199,41 +218,12 @@ def get_pipeline():
             )
 
         pipeline = joblib.load(PIPELINE_PATH)
-
-        # 👇 ADD THESE LINES
-        print("✅ MODEL LOADED FROM:", PIPELINE_PATH)
-        print("🔎 MODEL TYPE:", type(pipeline))
+        print("MODEL LOADED FROM:", PIPELINE_PATH)
+        print("MODEL TYPE:", type(pipeline))
 
         meta = json.loads(META_PATH.read_text())
 
     return pipeline, meta
-
-
-# ── database model ────────────────────────────────────────────────────────
-class Prediction(db.Model):
-    """Stores every prediction made through the web app."""
-    __tablename__ = "predictions"
-
-    id          = db.Column(db.Integer, primary_key=True)
-    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
-
-    # Input features (stored as JSON string for flexibility)
-    input_data  = db.Column(db.Text, nullable=False)
-
-    # Outputs
-    prediction  = db.Column(db.Integer, nullable=False)   # 0 or 1
-    probability = db.Column(db.Float,   nullable=False)   # P(disease)
-    risk_level  = db.Column(db.String(20), nullable=False) # Low / Medium / High
-
-    def to_dict(self):
-        return {
-            "id":          self.id,
-            "created_at":  self.created_at.strftime("%Y-%m-%d %H:%M"),
-            "input_data":  json.loads(self.input_data),
-            "prediction":  self.prediction,
-            "probability": round(self.probability * 100, 1),
-            "risk_level":  self.risk_level,
-        }
 
 
 # ── helpers ────────────────────────────────────────────────────────────────
@@ -259,7 +249,6 @@ def parse_form(form_data: dict) -> pd.DataFrame:
 
     for feat in m["categorical_features"]:
         raw = str(form_data.get(feat, "")).strip()
-        # Encode categorical string to numeric (0, 1, 2, ...) using meta categories
         cats = m["categories"].get(feat, [])
         if raw in cats:
             row[feat] = cats.index(raw)
@@ -268,7 +257,6 @@ def parse_form(form_data: dict) -> pd.DataFrame:
 
     df = pd.DataFrame([row])
 
-    # Reorder columns to exactly match training order
     if hasattr(pipe, "feature_names_in_"):
         df = df[pipe.feature_names_in_]
     else:
@@ -284,29 +272,22 @@ def index():
     return render_template("index.html", news=news)
 
 @app.route("/predict", methods=["GET", "POST"])
+@login_required
 def predict():
-    """
-    GET  → Render the prediction form.
-    POST → Accept form data or JSON, run inference, persist result, respond.
-    """
     model, m = get_pipeline()
 
     if request.method == "GET":
         return render_template("predict.html", meta=m)
 
-    # ── determine input source ────────────────────────────────────────────
     if request.is_json:
         data = request.get_json(force=True)
     else:
         data = request.form.to_dict()
 
-    # ── inference ─────────────────────────────────────────────────────────
     try:
         X = parse_form(data)
         pred  = int(model.predict(X)[0])
         proba = float(model.predict_proba(X)[0][1])
-
-        
     except Exception as exc:
         err = {"error": str(exc)}
         if request.is_json:
@@ -316,8 +297,14 @@ def predict():
 
     risk = risk_label(proba)
 
-    # ── persist ───────────────────────────────────────────────────────────
+    shap_explanation = None
+    try:
+        shap_explanation = compute_shap_explanation(model, X, m)
+    except Exception:
+        pass
+
     record = Prediction(
+        user_id     = current_user.id if current_user.is_authenticated else None,
         input_data  = json.dumps(data),
         prediction  = pred,
         probability = proba,
@@ -331,29 +318,38 @@ def predict():
         "probability": round(proba * 100, 1),
         "risk_level":  risk,
         "record_id":   record.id,
+        "shap_explanation": shap_explanation,
     }
 
-    # ── respond ───────────────────────────────────────────────────────────
     if request.is_json:
         return jsonify(result)
 
-    return render_template("result.html", result=result, inputs=data, meta=m)
+    is_htmx = request.headers.get("HX-Request") == "true"
+    if is_htmx:
+        return render_template("_result_content.html", result=result, inputs=data, meta=m, shap_explanation=shap_explanation)
+
+    return render_template("result.html", result=result, inputs=data, meta=m, shap_explanation=shap_explanation)
 
 
 @app.route("/history")
+@login_required
 def history():
-    """Show a table of all past predictions."""
-    records = (Prediction.query
-               .order_by(Prediction.created_at.desc())
-               .limit(100)
-               .all())
-    return render_template("history.html",
-                           records=[r.to_dict() for r in records])
+    if current_user.role == 'admin':
+        records = Prediction.query.order_by(Prediction.created_at.desc()).limit(100).all()
+    elif current_user.role == 'doctor' and current_user.is_approved_doctor:
+        records = Prediction.query.order_by(Prediction.created_at.desc()).limit(100).all()
+    else:
+        records = Prediction.query.filter_by(user_id=current_user.id).order_by(Prediction.created_at.desc()).limit(100).all()
+    return render_template("history.html", records=[r.to_dict() for r in records])
 
 
 @app.route("/history/clear", methods=["POST"])
+@login_required
 def clear_history():
-    """Delete all prediction records (for demo convenience)."""
+    if current_user.role != 'admin':
+        flash("Only admins can clear history.", "danger")
+        return redirect(url_for("history"))
+
     Prediction.query.delete()
     db.session.commit()
     flash("History cleared.", "info")
@@ -369,21 +365,28 @@ def about():
 
 @app.route("/api/predict", methods=["POST"])
 def api_predict():
-    """
-    Pure JSON API endpoint (same logic as /predict POST with JSON).
-    Useful if you embed this in a larger app or call from JS.
+    return predict()
 
-    Example curl:
-        curl -X POST http://localhost:5000/api/predict \\
-             -H 'Content-Type: application/json' \\
-             -d '{"age":63,"sex":"Male","cp":"typical angina",...}'
-    """
-    return predict()   # reuses the same logic
+
+# ── error handlers ─────────────────────────────────────────────────────────
+@app.errorhandler(401)
+def unauthorized(e):
+    if request.is_json:
+        return jsonify({"error": "Authentication required"}), 401
+    flash("Please log in to access this page.", "warning")
+    return redirect(url_for("auth.login"))
+
+@app.errorhandler(403)
+def forbidden(e):
+    if request.is_json:
+        return jsonify({"error": "Access denied"}), 403
+    flash("You don't have permission to access this page.", "danger")
+    return redirect(url_for("dashboard.redirect_dashboard"))
 
 
 # ── app entry point ───────────────────────────────────────────────────────
 with app.app_context():
-    db.create_all()    # creates predictions.db if it doesn't exist
+    db.create_all()
 
 if __name__ == "__main__":
     loaded_model, loaded_meta = get_pipeline()

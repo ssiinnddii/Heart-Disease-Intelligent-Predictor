@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - HeartPredict{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row mb-4">
+    <div class="col">
+      <h2><i class="bi bi-shield-lock me-2"></i>Admin Dashboard</h2>
+      <p class="text-muted">System administration and user management</p>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="text-primary">{{ stats.total_users }}</h3>
+          <p class="text-muted mb-0">Total Users</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="text-info">{{ stats.total_doctors }}</h3>
+          <p class="text-muted mb-0">Total Doctors</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="text-warning">{{ stats.pending_approvals }}</h3>
+          <p class="text-muted mb-0">Pending Approvals</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center border-0 shadow-sm">
+        <div class="card-body">
+          <h3 class="text-success">{{ stats.active_users }}</h3>
+          <p class="text-muted mb-0">Active Patients</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-hourglass-split me-2"></i>Pending Doctor Approvals</h5>
+          <span class="badge bg-warning">{{ pending_doctors|length }}</span>
+        </div>
+        <div class="card-body">
+          {% if pending_doctors %}
+          <div class="list-group">
+            {% for doctor in pending_doctors %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ doctor.username }}</strong>
+                <br><small class="text-muted">{{ doctor.email }}</small>
+                <br><small class="text-muted">Registered: {{ doctor.created_at.strftime('%Y-%m-%d') }}</small>
+              </div>
+              <div class="btn-group btn-group-sm">
+                <form method="POST" action="{{ url_for('dashboard.approve_doctor', user_id=doctor.id) }}" class="d-inline">
+                  <button type="submit" class="btn btn-success">Approve</button>
+                </form>
+                <form method="POST" action="{{ url_for('dashboard.reject_doctor', user_id=doctor.id) }}" class="d-inline ms-2">
+                  <button type="submit" class="btn btn-outline-danger">Reject</button>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="text-muted text-center py-3 mb-0">No pending approvals.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="mb-0"><i class="bi bi-people me-2"></i>Approved Doctors</h5>
+        </div>
+        <div class="card-body">
+          {% if approved_doctors %}
+          <div class="list-group">
+            {% for doctor in approved_doctors %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ doctor.username }}</strong>
+                <br><small class="text-muted">{{ doctor.email }}</small>
+                <br><small class="text-success">Approved: {{ doctor.approved_at.strftime('%Y-%m-%d') if doctor.approved_at else 'N/A' }}</small>
+              </div>
+              <span class="badge bg-success">Active</span>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="text-muted text-center py-3 mb-0">No approved doctors yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>All Users</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Registered</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in all_users %}
+                <tr>
+                  <td>{{ user.username }}</td>
+                  <td>{{ user.email }}</td>
+                  <td><span class="badge bg-secondary">{{ user.role }}</span></td>
+                  <td>
+                    {% if user.status == 'active' %}
+                    <span class="badge bg-success">{{ user.status }}</span>
+                    {% elif user.status == 'pending' %}
+                    <span class="badge bg-warning">{{ user.status }}</span>
+                    {% elif user.status == 'approved' %}
+                    <span class="badge bg-success">{{ user.status }}</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ user.status }}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                  <td>
+                    {% if user.role != 'admin' %}
+                    <form method="POST" action="{{ url_for('dashboard.toggle_user_status', user_id=user.id) }}" class="d-inline">
+                      <button type="submit" class="btn btn-sm btn-outline-secondary">
+                        {{ 'Deactivate' if user.status == 'active' else 'Activate' }}
+                      </button>
+                    </form>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
