@@ -76,3 +76,25 @@ class Prediction(db.Model):
             "probability": round(self.probability * 100, 1),
             "risk_level":  self.risk_level,
         }
+
+
+class PredictionNote(db.Model):
+    __tablename__ = "prediction_notes"
+
+    id            = db.Column(db.Integer, primary_key=True)
+    prediction_id = db.Column(db.Integer, db.ForeignKey('predictions.id'), nullable=False)
+    doctor_id     = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    note_text     = db.Column(db.Text, nullable=False)
+    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
+
+    prediction = db.relationship('Prediction', backref=db.backref('notes', lazy='dynamic'))
+    doctor     = db.relationship('User')
+
+    def to_dict(self):
+        return {
+            "id":            self.id,
+            "prediction_id": self.prediction_id,
+            "doctor_name":   self.doctor.username if self.doctor else "Unknown",
+            "note_text":     self.note_text,
+            "created_at":    self.created_at.strftime("%Y-%m-%d %H:%M"),
+        }

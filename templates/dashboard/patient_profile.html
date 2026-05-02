@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Patient #{{ patient.id }} - HeartPredict{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:960px">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">
+        <i class="bi bi-person-badge me-2 text-primary"></i>Patient #{{ '%03d' % patient.id }}
+      </h2>
+      <p class="text-muted mb-0">{{ patient.username }} &bull; {{ patient.email }}</p>
+    </div>
+    <a href="{{ url_for('dashboard.doctor_dashboard') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+    </a>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center p-3">
+        <h3 class="text-primary fw-bold mb-0">{{ stats.total }}</h3>
+        <small class="text-muted">Assessments</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center p-3">
+        <h3 class="text-danger fw-bold mb-0">{{ stats.high_risk }}</h3>
+        <small class="text-muted">High Risk</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center p-3">
+        <h3 class="text-warning fw-bold mb-0">{{ stats.medium_risk }}</h3>
+        <small class="text-muted">Medium Risk</small>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center p-3">
+        <h3 class="text-success fw-bold mb-0">{{ stats.low_risk }}</h3>
+        <small class="text-muted">Low Risk</small>
+      </div>
+    </div>
+  </div>
+
+  {% if records %}
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white">
+      <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Assessment History</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Risk Level</th>
+              <th>Probability</th>
+              <th>Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in records %}
+            <tr>
+              <td>{{ record.id }}</td>
+              <td>{{ record.created_at }}</td>
+              <td><span class="badge risk-{{ record.risk_level }}">{{ record.risk_level }}</span></td>
+              <td>{{ record.probability }}%</td>
+              <td>
+                {% if record.notes %}
+                  <span class="badge bg-info">{{ record.notes|length }} note{{ 's' if record.notes|length > 1 else '' }}</span>
+                {% else %}
+                  <span class="text-muted small">—</span>
+                {% endif %}
+              </td>
+              <td><button class="btn btn-sm btn-outline-primary view-prediction-btn"
+                          data-prediction-id="{{ record.id }}"
+                          data-bs-toggle="modal"
+                          data-bs-target="#predictionModal">View</button></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="card border-0 shadow-sm p-5 text-center">
+    <i class="bi bi-clipboard-x text-muted display-4"></i>
+    <h5 class="mt-3 text-muted">No assessments yet</h5>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Prediction Detail Modal -->
+<div class="modal fade" id="predictionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-clipboard2-pulse me-2 text-primary"></i>Assessment Details
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="predictionModalBody">
+        <div class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading…</span>
+          </div>
+          <p class="text-muted mt-2 mb-0">Loading assessment…</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+(function() {
+  var modal = document.getElementById('predictionModal');
+  var body = document.getElementById('predictionModalBody');
+
+  modal.addEventListener('show.bs.modal', function(event) {
+    var button = event.relatedTarget;
+    var predictionId = button.getAttribute('data-prediction-id');
+    body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading…</span></div><p class="text-muted mt-2 mb-0">Loading assessment…</p></div>';
+    fetch('/dashboard/prediction/' + predictionId, {
+      headers: {'HX-Request': 'true'}
+    })
+    .then(function(res) { return res.text(); })
+    .then(function(html) {
+      body.innerHTML = html;
+      bindNoteHandlers();
+    })
+    .catch(function() { body.innerHTML = '<p class="text-danger text-center">Failed to load details.</p>'; });
+  });
+
+  function bindNoteHandlers() {
+    var addBtn = document.getElementById('add-note-btn');
+    var noteInput = document.getElementById('note-input');
+    var charCount = document.getElementById('char-count');
+    var notesList = document.getElementById('notes-list');
+
+    if (!addBtn || !noteInput) return;
+
+    charCount.textContent = noteInput.value.length;
+
+    noteInput.addEventListener('input', function() {
+      charCount.textContent = noteInput.value.length;
+    });
+
+    addBtn.onclick = function() {
+      var text = noteInput.value.trim();
+      if (!text) return;
+
+      addBtn.disabled = true;
+      addBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Adding…';
+
+      fetch('/dashboard/prediction/' + addBtn.getAttribute('data-prediction-id') + '/note', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({note_text: text})
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.success) {
+          var note = data.note;
+          var html = '<div class="card border-0 bg-light mb-2 note-item" id="note-' + note.id + '">'
+            + '<div class="card-body p-3">'
+            + '<div class="d-flex justify-content-between align-items-start mb-1">'
+            + '<small class="fw-semibold">Dr. ' + note.doctor_name + '</small>'
+            + '<div class="d-flex align-items-center gap-2">'
+            + '<small class="text-muted">' + note.created_at + '</small>'
+            + '<button class="btn btn-sm btn-link text-danger p-0 delete-note-btn" data-note-id="' + note.id + '" data-prediction-id="' + note.prediction_id + '" title="Delete note"><i class="bi bi-x-lg" style="font-size:0.75rem"></i></button>'
+            + '</div></div>'
+            + '<p class="mb-0 small">' + note.note_text + '</p>'
+            + '</div></div>';
+
+          if (notesList.querySelector('.text-center')) {
+            notesList.innerHTML = html;
+          } else {
+            notesList.insertAdjacentHTML('afterbegin', html);
+          }
+          noteInput.value = '';
+          charCount.textContent = '0';
+          bindDeleteButtons();
+        }
+      })
+      .catch(function() { alert('Failed to add note.'); })
+      .finally(function() {
+        addBtn.disabled = false;
+        addBtn.innerHTML = '<i class="bi bi-plus-circle me-1"></i>Add Note';
+      });
+    };
+
+    bindDeleteButtons();
+  }
+
+  function bindDeleteButtons() {
+    document.querySelectorAll('#predictionModal .delete-note-btn').forEach(function(btn) {
+      btn.onclick = function() {
+        if (!confirm('Delete this note?')) return;
+        var noteId = btn.getAttribute('data-note-id');
+        var predId = btn.getAttribute('data-prediction-id');
+        fetch('/dashboard/prediction/' + predId + '/note/' + noteId, {method: 'DELETE'})
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            if (data.success) {
+              var el = document.getElementById('note-' + noteId);
+              if (el) el.remove();
+              var notesList = document.getElementById('notes-list');
+              if (notesList && !notesList.querySelector('.note-item')) {
+                notesList.innerHTML = '<p class="text-muted small text-center py-2 mb-0">No notes yet. Add one below.</p>';
+              }
+            }
+          });
+      };
+    });
+  }
+})();
+</script>
+{% endblock %}
+{% endblock %}

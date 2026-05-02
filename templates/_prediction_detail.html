@@ -16,6 +16,31 @@
   <small class="text-muted">Assessed on {{ record.created_at }}</small>
 </div>
 
+{% set patient = record.get('patient') %}
+{% if patient %}
+<div class="card border-0 bg-primary bg-opacity-10 mb-3">
+  <div class="card-body p-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <div class="small text-muted mb-1">Patient</div>
+        <div class="fw-bold">
+          <i class="bi bi-person-badge me-1"></i>
+          #{{ '%03d' % patient.id }} – {{ patient.username }}
+        </div>
+        <div class="small text-muted">{{ patient.email }}</div>
+      </div>
+      <div class="text-end">
+        <div class="small text-muted mb-1">Total Assessments</div>
+        <div class="fw-bold fs-5">{{ patient.total_assessments }}</div>
+      </div>
+    </div>
+    <a href="{{ url_for('dashboard.patient_profile', user_id=patient.id) }}" class="btn btn-sm btn-outline-primary mt-2">
+      View Full Patient Profile <i class="bi bi-arrow-right ms-1"></i>
+    </a>
+  </div>
+</div>
+{% endif %}
+
 <hr>
 
 <h6 class="fw-bold mb-3">
@@ -33,3 +58,55 @@
     </div>
   {% endfor %}
 </div>
+
+{% if record.get('is_doctor') and record.risk_level in ['Medium', 'High'] %}
+<hr class="mt-3 mb-3">
+
+<h6 class="fw-bold mb-3">
+  <i class="bi bi-journal-medical me-2 text-primary"></i>Doctor's Notes
+</h6>
+
+<div id="notes-list" class="mb-3">
+  {% if record.get('notes') %}
+    {% for note in record.notes %}
+    <div class="card border-0 bg-light mb-2 note-item" id="note-{{ note.id }}">
+      <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <small class="fw-semibold">Dr. {{ note.doctor_name }}</small>
+          <div class="d-flex align-items-center gap-2">
+            <small class="text-muted">{{ note.created_at }}</small>
+            <button class="btn btn-sm btn-link text-danger p-0 delete-note-btn"
+                    data-note-id="{{ note.id }}"
+                    data-prediction-id="{{ record.id }}"
+                    title="Delete note">
+              <i class="bi bi-x-lg" style="font-size:0.75rem"></i>
+            </button>
+          </div>
+        </div>
+        <p class="mb-0 small">{{ note.note_text }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted small text-center py-2 mb-0">No notes yet. Add one below.</p>
+  {% endif %}
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-3">
+    <label class="form-label small fw-semibold mb-1">Add a Note</label>
+    <textarea class="form-control form-control-sm mb-2"
+              id="note-input"
+              rows="2"
+              placeholder="Write your observation or recommendation…"
+              maxlength="1000"></textarea>
+    <div class="d-flex justify-content-between align-items-center">
+      <small class="text-muted"><span id="char-count">0</span>/1000</small>
+      <button class="btn btn-sm btn-primary" id="add-note-btn"
+              data-prediction-id="{{ record.id }}">
+        <i class="bi bi-plus-circle me-1"></i>Add Note
+      </button>
+    </div>
+  </div>
+</div>
+{% endif %}

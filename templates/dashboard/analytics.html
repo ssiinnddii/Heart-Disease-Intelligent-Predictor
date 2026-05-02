@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - HeartPredict{% endblock %}
+
+{% block content %}
+<style>
+  .chart-card { border: none; border-radius: 1rem; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .chart-card canvas { max-height: 320px; }
+  .stat-mini { text-align: center; padding: 1rem; }
+  .stat-mini .num { font-size: 2rem; font-weight: 800; }
+  .stat-mini .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; }
+</style>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="bi bi-graph-up-arrow me-2"></i>Patient Analytics</h2>
+      <p class="text-muted mb-0">Trends, risk patterns, and patient overview</p>
+    </div>
+    <a href="{{ url_for('dashboard.doctor_dashboard') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+    </a>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="chart-card bg-white p-3">
+        <div class="stat-mini">
+          <div class="num text-primary">{{ stats.total }}</div>
+          <div class="label">Total Assessments</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="chart-card bg-white p-3">
+        <div class="stat-mini">
+          <div class="num text-danger">{{ stats.high_risk }}</div>
+          <div class="label">High Risk</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="chart-card bg-white p-3">
+        <div class="stat-mini">
+          <div class="num text-warning">{{ stats.medium_risk }}</div>
+          <div class="label">Medium Risk</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="chart-card bg-white p-3">
+        <div class="stat-mini">
+          <div class="num text-success">{{ stats.low_risk }}</div>
+          <div class="label">Low Risk</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if total == 0 %}
+  <div class="chart-card bg-white p-5 text-center">
+    <i class="bi bi-bar-chart-line text-muted display-4"></i>
+    <h5 class="mt-3 text-muted">No data available yet</h5>
+    <p class="text-muted">Analytics will appear once patients start making assessments.</p>
+  </div>
+  {% else %}
+
+  <div class="row g-4 mb-4">
+    <!-- Risk Distribution Pie -->
+    <div class="col-md-6 col-lg-4">
+      <div class="chart-card bg-white p-4 h-100">
+        <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart-fill me-2 text-primary"></i>Risk Distribution</h6>
+        <div style="max-height:280px; display:flex; justify-content:center;">
+          <canvas id="riskPieChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly Average Risk Trend -->
+    <div class="col-md-6 col-lg-8">
+      <div class="chart-card bg-white p-4 h-100">
+        <h6 class="fw-bold mb-3"><i class="bi bi-graph-up me-2 text-primary"></i>Monthly Average Risk</h6>
+        <canvas id="monthlyChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- Predictions Timeline -->
+    <div class="col-lg-8">
+      <div class="chart-card bg-white p-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-calendar3 me-2 text-primary"></i>Assessment Timeline</h6>
+        <canvas id="timelineChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Age vs Risk Scatter -->
+    <div class="col-lg-4">
+      <div class="chart-card bg-white p-4 h-100">
+        <h6 class="fw-bold mb-3"><i class="bi bi-person-circle me-2 text-primary"></i>Age vs Risk</h6>
+        <canvas id="ageScatterChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- Patient Risk Breakdown -->
+    <div class="col-12">
+      <div class="chart-card bg-white p-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-people-fill me-2 text-primary"></i>Patient Risk Breakdown (Top 8 by High Risk)</h6>
+        <canvas id="patientChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+{% block extra_js %}
+<script>
+if (typeof Chart !== 'undefined' && {{ total }} > 0) {
+  Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+  Chart.defaults.font.size = 12;
+
+  var riskDist = {
+    labels: ['Low', 'Medium', 'High'],
+    data: [{{ risk_dist.Low }}, {{ risk_dist.Medium }}, {{ risk_dist.High }}]
+  };
+  new Chart(document.getElementById('riskPieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: riskDist.labels,
+      datasets: [{
+        data: riskDist.data,
+        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '55%',
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 15, usePointStyle: true } }
+      }
+    }
+  });
+
+  var monthlyLabels = {{ monthly_labels | tojson }};
+  var monthlyData = {{ monthly_data | tojson }};
+  new Chart(document.getElementById('monthlyChart'), {
+    type: 'bar',
+    data: {
+      labels: monthlyLabels,
+      datasets: [{
+        label: 'Average Risk (%)',
+        data: monthlyData,
+        backgroundColor: monthlyData.map(function(v) {
+          return v < 35 ? 'rgba(40,167,69,0.7)' : v < 65 ? 'rgba(255,193,7,0.7)' : 'rgba(220,53,69,0.7)';
+        }),
+        borderColor: monthlyData.map(function(v) {
+          return v < 35 ? '#28a745' : v < 65 ? '#ffc107' : '#dc3545';
+        }),
+        borderWidth: 1,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Risk %' } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  var datesProbs = {{ dates_probs | tojson }};
+  new Chart(document.getElementById('timelineChart'), {
+    type: 'line',
+    data: {
+      labels: datesProbs.map(function(d) { return d.date; }),
+      datasets: [{
+        label: 'Risk %',
+        data: datesProbs.map(function(d) { return d.probability; }),
+        borderColor: '#1a73e8',
+        backgroundColor: 'rgba(26,115,232,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Risk %' } },
+        x: { ticks: { maxRotation: 45 } }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  var ageProbs = {{ ages_vs_probs | tojson }};
+  if (ageProbs.length > 0) {
+    new Chart(document.getElementById('ageScatterChart'), {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: 'Age vs Risk',
+          data: ageProbs,
+          backgroundColor: ageProbs.map(function(d) {
+            return d.probability < 35 ? '#28a745' : d.probability < 65 ? '#ffc107' : '#dc3545';
+          }),
+          pointRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { title: { display: true, text: 'Age' } },
+          y: { beginAtZero: true, max: 100, title: { display: true, text: 'Risk %' } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  var patientNames = {{ patient_names | tojson }};
+  var patientHigh = {{ patient_high | tojson }};
+  var patientMedium = {{ patient_medium | tojson }};
+  var patientLow = {{ patient_low | tojson }};
+  if (patientNames.length > 0) {
+    new Chart(document.getElementById('patientChart'), {
+      type: 'bar',
+      data: {
+        labels: patientNames,
+        datasets: [
+          { label: 'High Risk', data: patientHigh, backgroundColor: '#dc3545', borderRadius: 4 },
+          { label: 'Medium Risk', data: patientMedium, backgroundColor: '#ffc107', borderRadius: 4 },
+          { label: 'Low Risk', data: patientLow, backgroundColor: '#28a745', borderRadius: 4 }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { stacked: true },
+          y: { stacked: true, title: { display: true, text: 'Number of Assessments' } }
+        },
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+  }
+}
+</script>
+{% endblock %}
+{% endblock %}
