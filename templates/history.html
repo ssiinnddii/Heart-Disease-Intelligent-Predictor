@@ -57,10 +57,10 @@
               </td>
               <td>
                 <div class="progress" style="width:90px; height:.7rem;">
-                  <div class="progress-bar
-                    {% if rec.risk_level == 'Low' %}bg-success
-                    {% elif rec.risk_level == 'Medium' %}bg-warning
-                    {% else %}bg-danger{% endif %}"
+<div class="progress-bar
+                      {% if rec.risk_level == 'Low' %}bg-success
+                      {% elif rec.risk_level == 'Medium' %}bg-warning
+                      {% else %}bg-danger{% endif %}"
                     style="width:{{ rec.probability }}%">
                   </div>
                 </div>

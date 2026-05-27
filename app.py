@@ -51,6 +51,7 @@ from models import db, User, Prediction
 from auth import init_login
 from auth_routes import auth
 from dashboard_routes import dashboard
+from assistant_routes import assistant_bp
 from shap_utils import compute_shap_explanation
 
 def get_heart_news():
@@ -198,6 +199,7 @@ init_login(app)
 
 app.register_blueprint(auth)
 app.register_blueprint(dashboard)
+app.register_blueprint(assistant_bp)
 
 # ── load model & metadata ─────────────────────────────────────────────────
 PIPELINE_PATH = BASE_DIR / "models" / "heart_disease_model.pkl"

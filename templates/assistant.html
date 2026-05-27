@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% block title %}HeartPredict – AI Assistant{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --card-red: #E53935;
+    --card-red-dark: #B71C1C;
+    --card-red-light: #FFCDD2;
+  }
+
+  .assistant-page {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .assistant-header {
+    text-align: center;
+    padding: 2.5rem 0 1.5rem;
+  }
+  .assistant-header .header-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--card-red), var(--card-red-dark));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 4px 14px rgba(229, 57, 53, 0.25);
+  }
+  .assistant-header .header-icon i {
+    font-size: 1.5rem;
+    color: #fff;
+  }
+  .assistant-header h1 {
+    font-weight: 800;
+    font-size: 2rem;
+    color: #1a1a2e;
+  }
+  .assistant-header p {
+    color: #888;
+    max-width: 480px;
+    margin: 0.3rem auto 0;
+    font-size: 0.95rem;
+  }
+
+  .chat-container-page {
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.6);
+    display: flex;
+    flex-direction: column;
+    height: 65vh;
+    min-height: 420px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.4);
+  }
+
+  .chat-header-bar {
+    background: linear-gradient(135deg, var(--card-red), var(--card-red-dark));
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    color: #fff;
+  }
+  .chat-header-bar .bar-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .chat-header-bar .bar-avatar i {
+    font-size: 1.1rem;
+    color: #fff;
+  }
+  .chat-header-bar .bar-info h5 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+  .chat-header-bar .bar-info small {
+    font-size: 0.7rem;
+    opacity: 0.85;
+  }
+
+  .chat-messages-page {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+    scroll-behavior: smooth;
+  }
+  .chat-messages-page::-webkit-scrollbar { width: 5px; }
+  .chat-messages-page::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages-page::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+  .chat-messages-page .message {
+    max-width: 82%;
+    padding: 0.75rem 1.1rem;
+    border-radius: 18px;
+    line-height: 1.55;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    animation: msgSlide 0.3s ease-out;
+  }
+  @keyframes msgSlide {
+    0%   { opacity: 0; transform: translateY(8px) scale(0.97); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .chat-messages-page .message.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, var(--card-red), #D32F2F);
+    color: #fff;
+    border-bottom-right-radius: 5px;
+    box-shadow: 0 2px 8px rgba(229, 57, 53, 0.18);
+  }
+  .chat-messages-page .message.bot {
+    align-self: flex-start;
+    background: #fff;
+    color: #1a1a2e;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03);
+  }
+
+  .typing-indicator {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    padding: 0.4rem 0;
+  }
+  .typing-indicator span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #bbb;
+    animation: dotBounce 1.4s infinite ease-in-out both;
+  }
+  .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+  .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0s; }
+  @keyframes dotBounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+  }
+
+  .chat-input-area {
+    display: flex;
+    gap: 0.6rem;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    background: #fff;
+    flex-shrink: 0;
+  }
+  .chat-input-area input {
+    flex: 1;
+    border: 1.5px solid #eee;
+    border-radius: 28px;
+    padding: 0.65rem 1.25rem;
+    font-size: 0.9rem;
+    outline: none;
+    font-family: inherit;
+    background: #f9f9f9;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .chat-input-area input::placeholder { color: #bbb; }
+  .chat-input-area input:focus {
+    border-color: var(--card-red);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.08);
+  }
+  .chat-input-area button {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--card-red), #D32F2F);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 10px rgba(229, 57, 53, 0.25);
+  }
+  .chat-input-area button:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(229, 57, 53, 0.35);
+  }
+  .chat-input-area button:active { transform: scale(0.92); }
+  .chat-input-area button:disabled {
+    background: #ccc;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .chat-input-area button svg {
+    width: 18px;
+    height: 18px;
+    fill: #fff;
+  }
+
+  .suggestion-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0 1.25rem 0.75rem;
+    background: #fff;
+  }
+  .suggestion-chips .chip {
+    background: #FFF5F5;
+    color: var(--card-red);
+    border: 1px solid #FFCDD2;
+    border-radius: 20px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .suggestion-chips .chip:hover {
+    background: var(--card-red);
+    color: #fff;
+    border-color: var(--card-red);
+  }
+
+  .disclaimer-bar {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.62rem;
+    color: #aaa;
+    text-align: center;
+    background: #fcfcfc;
+    border-top: 1px solid rgba(0,0,0,0.03);
+    flex-shrink: 0;
+    line-height: 1.4;
+  }
+  .disclaimer-bar strong { color: #c62828; font-weight: 600; }
+
+  @media (max-width: 576px) {
+    .chat-container-page {
+      height: 72vh;
+      min-height: 350px;
+      border-radius: 16px;
+    }
+    .assistant-header h1 { font-size: 1.5rem; }
+    .chat-messages-page .message { max-width: 90%; font-size: 0.88rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container assistant-page">
+  <div class="assistant-header">
+    <div class="header-icon">
+      <i class="bi bi-heart-pulse-fill"></i>
+    </div>
+    <h1>Heart Health Assistant</h1>
+    <p>Ask me anything about heart disease risk factors, your results, or healthy living tips.</p>
+  </div>
+
+  <div class="chat-container-page">
+    <div class="chat-header-bar">
+      <div class="bar-avatar">
+        <i class="bi bi-heart-pulse-fill"></i>
+      </div>
+      <div class="bar-info">
+        <h5>Heart Health Assistant</h5>
+        <small>AI-powered &middot; Educational guidance</small>
+      </div>
+    </div>
+
+    <div class="chat-messages-page" id="assistantMessages">
+      <div class="message bot">
+        Hello! I'm your Heart Health Assistant. I can help you understand heart disease risk factors, interpret prediction results, explain SHAP values, and offer healthy lifestyle guidance. What would you like to know?
+      </div>
+    </div>
+
+    <div class="suggestion-chips" id="suggestionChips">
+      <span class="chip" data-message="How does the prediction work?">How does the prediction work?</span>
+      <span class="chip" data-message="What do the risk levels mean?">What do the risk levels mean?</span>
+      <span class="chip" data-message="Tell me about risk factors">Tell me about risk factors</span>
+      <span class="chip" data-message="Heart healthy lifestyle tips">Heart healthy lifestyle tips</span>
+      <span class="chip" data-message="What is cholesterol?">What is cholesterol?</span>
+      <span class="chip" data-message="What is SHAP?">What is SHAP?</span>
+    </div>
+
+    <div class="chat-input-area">
+      <input type="text" id="assistantInput" placeholder="Type your question..." autofocus autocomplete="off">
+      <button id="assistantSend" title="Send">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="disclaimer-bar">
+      <strong>Educational information only.</strong> Not a substitute for professional medical advice.
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  const messagesEl = document.getElementById('assistantMessages');
+  const inputEl = document.getElementById('assistantInput');
+  const sendBtn = document.getElementById('assistantSend');
+  const chips = document.querySelectorAll('.chip');
+  let ready = true;
+
+  function addMessage(text, role) {
+    const div = document.createElement('div');
+    div.className = 'message ' + role;
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function showTyping() {
+    const div = document.createElement('div');
+    div.className = 'message bot';
+    div.id = 'typingIndicator';
+    div.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  async function sendMessage(msg) {
+    if (!msg.trim() || !ready) return;
+    addMessage(msg, 'user');
+    inputEl.value = '';
+    sendBtn.disabled = true;
+    ready = false;
+    showTyping();
+    try {
+      const resp = await fetch('/assistant/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, context: { page: 'assistant_page' } })
+      });
+      const data = await resp.json();
+      removeTyping();
+      if (data.response) addMessage(data.response, 'bot');
+      else addMessage('Sorry, something went wrong. Please try again.', 'bot');
+    } catch {
+      removeTyping();
+      addMessage('Unable to reach the assistant. Please try again.', 'bot');
+    } finally {
+      sendBtn.disabled = false;
+      ready = true;
+      inputEl.focus();
+    }
+  }
+
+  sendBtn.addEventListener('click', function() { sendMessage(inputEl.value); });
+  inputEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') sendMessage(inputEl.value);
+  });
+  chips.forEach(function(chip) {
+    chip.addEventListener('click', function() { sendMessage(chip.dataset.message); });
+  });
+})();
+</script>
+{% endblock %}

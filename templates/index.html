@@ -30,7 +30,8 @@
 </style>
 
 <div class="hero">
-  <div class="container text-start">
+  <i class="bi bi-heart-pulse-fill hero-float-icon"></i>
+  <div class="container text-start" data-aos="fade-up" data-aos-duration="1000">
 
     <span class="badge bg-light text-primary mb-3 px-3 py-2">
       AI-Powered Heart Analysis
@@ -106,10 +107,8 @@
     border-bottom: none;
   }
   .risk-row-low     { background: #d4edda; }
-  .risk-row-moderate { background: #fff3cd; }
-  .risk-row-medium   { background: #ffe0b2; }
-  .risk-row-high     { background: #f8a9a9; }
-  .risk-row-very-high { background: #dc3545; color: #fff; }
+  .risk-row-medium  { background: #fff3cd; }
+  .risk-row-high    { background: #f8a9a9; }
 
   .risk-badge {
     display: inline-block;
@@ -121,10 +120,8 @@
     letter-spacing: 0.3px;
   }
   .risk-badge-low       { background: #28a745; color: #fff; }
-  .risk-badge-moderate  { background: #ffc107; color: #212529; }
   .risk-badge-medium    { background: #fd7e14; color: #fff; }
   .risk-badge-high      { background: #dc3545; color: #fff; }
-  .risk-badge-very-high { background: #6c0000; color: #fff; }
 
   .info-section-title {
     font-size: 0.75rem;
@@ -141,7 +138,7 @@
 <div class="container mt-5">
 
   <!-- Quick Facts Bar -->
-  <div class="quick-facts-bar">
+  <div class="quick-facts-bar" data-aos="fade-up">
     <h5><i class="bi bi-lightning-fill me-2"></i>Quick Facts</h5>
     <div class="row g-3">
       <div class="col-md-6">
@@ -160,10 +157,10 @@
   </div>
 
   <!-- Main content card -->
-  <div class="card border-0 shadow-sm p-4 p-md-5">
+  <div class="card border-0 shadow-sm p-4 p-md-5" data-aos="fade-up" data-aos-delay="100">
 
     <!-- Understanding Your Heart Disease Risk -->
-    <h3 class="fw-bold mb-3">Understanding Your Heart Disease Risk</h3>
+    <h3 class="fw-bold mb-3" data-aos="fade-up">Understanding Your Heart Disease Risk</h3>
     <p class="text-muted mb-4">
       Heart disease risk is influenced by a combination of factors including age, blood pressure, cholesterol,
       chest pain type, exercise capacity, and more. Our assessment tool analyses these clinical indicators to
@@ -171,7 +168,7 @@
     </p>
 
     <!-- Risk Level Categories -->
-    <div class="table-responsive mb-5">
+    <div class="table-responsive mb-5" data-aos="fade-up" data-aos-delay="150">
       <table class="risk-table">
         <thead>
           <tr>
@@ -186,79 +183,60 @@
             <td>Below 35%</td>
             <td>Your clinical indicators suggest a lower likelihood of heart disease. Continue maintaining heart-healthy habits.</td>
           </tr>
-          <tr class="risk-row-moderate">
-            <td><span class="risk-badge risk-badge-moderate">Moderate Risk</span></td>
-            <td>35% – 50%</td>
-            <td>Some risk factors are present. Discuss your results with a healthcare provider and consider lifestyle adjustments.</td>
-          </tr>
           <tr class="risk-row-medium">
             <td><span class="risk-badge risk-badge-medium">Medium Risk</span></td>
-            <td>50% – 65%</td>
-            <td>Multiple risk indicators are elevated. A medical evaluation is recommended to assess your cardiovascular health.</td>
+            <td>35% – 65%</td>
+            <td>Some risk factors are present. Discuss your results with a healthcare provider and consider lifestyle adjustments.</td>
           </tr>
           <tr class="risk-row-high">
             <td><span class="risk-badge risk-badge-high">High Risk</span></td>
-            <td>65% – 80%</td>
+            <td>Above 65%</td>
             <td>Significant risk factors detected. Consult a healthcare professional promptly for further cardiac evaluation.</td>
-          </tr>
-          <tr class="risk-row-very-high">
-            <td><span class="risk-badge risk-badge-very-high">Very High Risk</span></td>
-            <td>Above 80%</td>
-            <td>Strong indicators of heart disease. Seek medical attention and comprehensive cardiac testing as soon as possible.</td>
           </tr>
         </tbody>
       </table>
-    </div>
-
-    <div class="alert alert-light border mb-4">
-      <small class="text-muted">
-        <i class="bi bi-info-circle me-1"></i>
-        <strong>Note:</strong> This assessment tool is for <em>educational purposes only</em> and does not
-        replace a professional medical diagnosis. Always consult a qualified healthcare provider for
-        an accurate evaluation of your heart health.
-      </small>
     </div>
 
     <!-- Key Risk Factors -->
     <div class="mb-4">
       <div class="info-section-title">Key Risk Factors</div>
       <div class="row g-3">
-        <div class="col-md-4">
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
           <div class="p-3 rounded-4 bg-light h-100">
             <i class="bi bi-calendar3 text-primary me-2"></i>
             <strong>Age</strong>
             <p class="text-muted mb-0 small">Risk increases with age as arteries naturally stiffen over time.</p>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
           <div class="p-3 rounded-4 bg-light h-100">
             <i class="bi bi-activity text-danger me-2"></i>
             <strong>High Blood Pressure</strong>
             <p class="text-muted mb-0 small">Forces the heart to work harder, damaging arteries over time.</p>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
           <div class="p-3 rounded-4 bg-light h-100">
             <i class="bi bi-droplet-fill text-warning me-2"></i>
             <strong>High Cholesterol</strong>
             <p class="text-muted mb-0 small">Leads to plaque buildup that narrows and blocks arteries.</p>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="400">
           <div class="p-3 rounded-4 bg-light h-100">
             <i class="bi bi-heart-pulse-fill text-success me-2"></i>
             <strong>Chest Pain Type</strong>
             <p class="text-muted mb-0 small">Certain types of chest pain are strong indicators of heart disease.</p>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="500">
           <div class="p-3 rounded-4 bg-light h-100">
             <i class="bi bi-speedometer2 text-info me-2"></i>
             <strong>Max Heart Rate</strong>
             <p class="text-muted mb-0 small">Lower maximum heart rate during exercise may indicate reduced cardiac fitness.</p>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="600">
           <div class="p-3 rounded-4 bg-light h-100">
             <i class="bi bi-graph-down-arrow text-secondary me-2"></i>
             <strong>ST Depression</strong>
@@ -270,9 +248,9 @@
 
     <!-- Warning Signs -->
     <div class="mb-4">
-      <div class="info-section-title">Warning Signs of Heart Disease</div>
+      <div class="info-section-title" data-aos="fade-up">Warning Signs of Heart Disease</div>
       <div class="row g-3">
-        <div class="col-md-6">
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="100">
           <div class="p-3 rounded-4 bg-light h-100">
             <ul class="list-unstyled mb-0">
               <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Chest pain, pressure, or tightness</li>
@@ -282,7 +260,7 @@
             </ul>
           </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
           <div class="p-3 rounded-4 bg-light h-100">
             <ul class="list-unstyled mb-0">
               <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Unusual fatigue or weakness</li>
@@ -297,30 +275,30 @@
 
     <!-- Prevention Tips -->
     <div>
-      <div class="info-section-title">Heart-Healthy Prevention</div>
+      <div class="info-section-title" data-aos="fade-up">Heart-Healthy Prevention</div>
       <div class="row g-3">
-        <div class="col-sm-6 col-lg-3">
+        <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
           <div class="p-3 rounded-4 bg-light text-center h-100">
             <i class="bi bi-apple text-success fs-4 d-block mb-2"></i>
             <strong class="d-block">Healthy Diet</strong>
             <small class="text-muted">Low sodium, whole grains, fruits, and vegetables</small>
           </div>
         </div>
-        <div class="col-sm-6 col-lg-3">
+        <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
           <div class="p-3 rounded-4 bg-light text-center h-100">
             <i class="bi bi-bicycle text-primary fs-4 d-block mb-2"></i>
             <strong class="d-block">Regular Exercise</strong>
             <small class="text-muted">At least 150 minutes of moderate activity per week</small>
           </div>
         </div>
-        <div class="col-sm-6 col-lg-3">
+        <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
           <div class="p-3 rounded-4 bg-light text-center h-100">
             <i class="bi bi-bandaid text-warning fs-4 d-block mb-2"></i>
             <strong class="d-block">Regular Screening</strong>
             <small class="text-muted">Monitor cholesterol, BP, and blood sugar annually</small>
           </div>
         </div>
-        <div class="col-sm-6 col-lg-3">
+        <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="400">
           <div class="p-3 rounded-4 bg-light text-center h-100">
             <i class="bi bi-emoji-smile text-info fs-4 d-block mb-2"></i>
             <strong class="d-block">Manage Stress</strong>
@@ -334,7 +312,7 @@
 </div>
 
 <!-- Heart health news -->
-<div class="container mt-5 mb-4">
+<div class="container mt-5 mb-4" data-aos="fade-up">
   <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
       <h2 class="fw-bold mb-1">Latest Heart Health News</h2>
@@ -350,7 +328,7 @@
   {% if news %}
     <div class="row g-4">
       {% for article in news %}
-        <div class="col-md-6 col-lg-4">
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ 100 * (loop.index0 % 3) }}">
           <div class="card h-100 shadow-sm border-0">
             {% if article.image %}
               <img src="{{ article.image }}" class="card-img-top" alt="News image"
@@ -400,7 +378,7 @@
 </div>
 
 <!-- Disclaimer -->
-<div class="container mt-4">
+<div class="container mt-4" data-aos="fade-up">
   <div class="alert alert-warning d-flex align-items-start gap-3" role="alert">
     <i class="bi bi-exclamation-triangle-fill fs-4 mt-1 flex-shrink-0"></i>
     <div>

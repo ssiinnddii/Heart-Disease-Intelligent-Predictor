@@ -103,7 +103,9 @@
     </div>
     <div class="progress" style="height:1rem; border-radius:.5rem;">
       <div class="progress-bar
-        {% if result.risk_level == 'Low' %}bg-success{% elif result.risk_level == 'Medium' %}bg-warning{% else %}bg-danger{% endif %}"
+        {% if result.risk_level == 'Low' %}bg-success
+        {% elif result.risk_level == 'Medium' %}bg-warning
+        {% else %}bg-danger{% endif %}"
         role="progressbar"
         style="width:{{ result.probability }}%"
         aria-valuenow="{{ result.probability }}" aria-valuemin="0" aria-valuemax="100">

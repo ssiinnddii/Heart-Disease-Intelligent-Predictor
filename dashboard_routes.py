@@ -346,8 +346,8 @@ def analytics():
                            overall_avg=overall_avg,
                            total=len(all_records),
                            stats={
-                               'total': Prediction.query.count(),
-                               'high_risk': risk_dist['High'],
-                               'medium_risk': risk_dist['Medium'],
-                               'low_risk': risk_dist['Low'],
+                                'total': Prediction.query.count(),
+                                'high_risk': risk_dist['High'],
+                                'medium_risk': risk_dist['Medium'],
+                                'low_risk': risk_dist['Low'],
                            })

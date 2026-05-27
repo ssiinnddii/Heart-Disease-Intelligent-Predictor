@@ -11,14 +11,63 @@
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
         rel="stylesheet"/>
+  <!-- AOS - Animate On Scroll -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
   <style>
     :root {
       --primary-color: #1a73e8;
       --primary-dark: #0d47a1;
       --accent-red: #c62828;
+      --transition-smooth: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --transition-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    body { background: #f8f9fa; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: #f8f9fa;
+      overflow-x: hidden;
+    }
+
+    /* ── subtle background atmosphere ── */
+    .bg-atmosphere {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .bg-atmosphere .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.06;
+      animation: blobDrift 20s ease-in-out infinite;
+    }
+    .bg-atmosphere .blob:nth-child(1) {
+      width: 500px; height: 500px;
+      background: var(--primary-color);
+      top: -10%; left: -5%;
+    }
+    .bg-atmosphere .blob:nth-child(2) {
+      width: 400px; height: 400px;
+      background: var(--accent-red);
+      bottom: -5%; right: -5%;
+      animation-delay: -7s;
+      opacity: 0.04;
+    }
+    .bg-atmosphere .blob:nth-child(3) {
+      width: 300px; height: 300px;
+      background: var(--primary-dark);
+      top: 40%; left: 55%;
+      animation-delay: -14s;
+    }
+    @keyframes blobDrift {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -30px) scale(1.08); }
+      66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
 
     /* ── hero ── */
     .hero {
@@ -26,11 +75,40 @@
       color: #fff;
       padding: 5rem 0 4rem;
       border-radius: 0 0 2rem 2rem;
+      position: relative;
+      overflow: hidden;
     }
     .hero h1 { font-size: 2.6rem; font-weight: 800; }
 
+    /* floating heart icon in hero */
+    .hero-float-icon {
+      position: absolute;
+      font-size: 12rem;
+      opacity: 0.07;
+      right: -2rem;
+      bottom: -2rem;
+      animation: heroHeartFloat 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes heroHeartFloat {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
     /* ── cards ── */
-    .card { border: none; border-radius: 1rem; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+    .card {
+      border: none;
+      border-radius: 1rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+      transition: transform 0.35s var(--transition-smooth),
+                  box-shadow 0.35s var(--transition-smooth);
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.1);
+    }
+    .card .card-img-top { transition: transform 0.5s var(--transition-smooth); }
+    .card:hover .card-img-top { transform: scale(1.03); }
 
     /* ── risk badges ── */
     .risk-Low    { background: #d4edda; color: #155724; }
@@ -40,8 +118,30 @@
     /* ── probability gauge ── */
     .gauge-bar { height: 1.2rem; border-radius: .6rem; }
 
+    /* ── progress bar animation ── */
+    .progress .progress-bar {
+      transition: width 1.2s var(--transition-spring);
+    }
+
+    /* ── btn hover smooth ── */
+    .btn {
+      transition: all 0.3s var(--transition-smooth);
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: scale(0.97); }
+
+    /* ── section fade-up base ── */
+    [data-aos] { pointer-events: none; }
+    [data-aos].aos-animate { pointer-events: auto; }
+
     /* ── footer ── */
-    footer { background: #fff; border-top: 3px solid #fff; font-size: .85rem; }
+    footer {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      color: rgba(255,255,255,0.8);
+      font-size: .85rem;
+    }
+    footer a { color: rgba(255,255,255,0.9); }
+    footer a:hover { color: #fff; }
 
     /* ── form section headers ── */
     .section-header {
@@ -54,11 +154,242 @@
       padding-bottom: .4rem;
       margin-bottom: 1rem;
     }
+
+    /* ── floating chat widget ── */
+    .chat-fab {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 1055;
+    }
+    .chat-fab .fab-btn {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #E53935, #B71C1C);
+      border: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(229,57,53,0.4);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease;
+      position: relative;
+    }
+    .chat-fab .fab-btn:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(229,57,53,0.5); }
+    .chat-fab .fab-btn:active { transform: scale(0.92); }
+    .chat-fab .fab-btn .pulse-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid rgba(229,57,53,0.3);
+      animation: fabPulse 2s ease-out infinite;
+    }
+    @keyframes fabPulse {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    .chat-fab .fab-tooltip {
+      position: absolute;
+      right: 66px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #333;
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.4rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .chat-fab .fab-tooltip::after {
+      content: '';
+      position: absolute;
+      right: -5px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 5px solid transparent;
+      border-left-color: #333;
+    }
+    .chat-fab .fab-btn:hover + .fab-tooltip,
+    .chat-fab:hover .fab-tooltip { opacity: 1; }
+    .chat-fab .fab-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      color: #E53935;
+      font-size: 0.6rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .chat-popup {
+      position: fixed;
+      bottom: 5rem;
+      right: 1.5rem;
+      z-index: 1055;
+      width: 360px;
+      max-height: 520px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 1rem;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+      border: 1px solid rgba(255,255,255,0.5);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: popupIn 0.3s ease-out;
+    }
+    .chat-popup.show { display: flex; }
+    @keyframes popupIn {
+      0% { opacity: 0; transform: translateY(16px) scale(0.95); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .chat-popup .popup-header {
+      background: linear-gradient(135deg, #E53935, #B71C1C);
+      color: #fff;
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-shrink: 0;
+    }
+    .chat-popup .popup-header .popup-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chat-popup .popup-header .popup-avatar i { font-size: 1rem; color: #fff; }
+    .chat-popup .popup-header .popup-info h6 { margin: 0; font-size: 0.85rem; font-weight: 700; }
+    .chat-popup .popup-header .popup-info small { font-size: 0.65rem; opacity: 0.85; }
+    .chat-popup .popup-close {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.7);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .chat-popup .popup-close:hover { color: #fff; }
+    .chat-popup .popup-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+      min-height: 200px;
+    }
+    .chat-popup .popup-messages::-webkit-scrollbar { width: 4px; }
+    .chat-popup .popup-messages::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+    .chat-popup .popup-messages .msg {
+      max-width: 88%;
+      padding: 0.6rem 0.9rem;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      word-wrap: break-word;
+      animation: msgSlide 0.25s ease-out;
+    }
+    .chat-popup .popup-messages .msg.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #E53935, #D32F2F);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-popup .popup-messages .msg.bot {
+      align-self: flex-start;
+      background: #fff;
+      color: #1a1a2e;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .chat-popup .popup-input-area {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-top: 1px solid rgba(0,0,0,0.05);
+      background: #fff;
+      flex-shrink: 0;
+    }
+    .chat-popup .popup-input-area input {
+      flex: 1;
+      border: 1.5px solid #eee;
+      border-radius: 24px;
+      padding: 0.5rem 1rem;
+      font-size: 0.82rem;
+      outline: none;
+      font-family: inherit;
+      background: #f9f9f9;
+    }
+    .chat-popup .popup-input-area input:focus {
+      border-color: #E53935;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(229,57,53,0.08);
+    }
+    .chat-popup .popup-input-area button {
+      width: 36px; height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #E53935, #D32F2F);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+    .chat-popup .popup-input-area button:hover { transform: scale(1.1); }
+    .chat-popup .popup-input-area button:active { transform: scale(0.92); }
+    .chat-popup .popup-input-area button svg { width: 14px; height: 14px; fill: #fff; }
+    .chat-popup .popup-disclaimer {
+      padding: 0.4rem 1rem;
+      font-size: 0.55rem;
+      color: #aaa;
+      text-align: center;
+      background: #fcfcfc;
+      border-top: 1px solid rgba(0,0,0,0.03);
+      flex-shrink: 0;
+    }
+    .chat-popup .popup-disclaimer strong { color: #c62828; }
+
+    @media (max-width: 480px) {
+      .chat-popup {
+        width: calc(100vw - 2rem);
+        right: 1rem;
+        bottom: 4.5rem;
+        max-height: 65vh;
+      }
+    }
   </style>
 
   {% block extra_head %}{% endblock %}
 </head>
 <body>
+
+<!-- ── background atmosphere ── -->
+<div class="bg-atmosphere">
+  <div class="blob"></div>
+  <div class="blob"></div>
+  <div class="blob"></div>
+</div>
 
 <!-- ── navbar ── -->
 <style>
@@ -66,8 +397,14 @@
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     box-shadow: 0 2px 10px rgba(0,0,0,0.15);
     padding: 0.6rem 0;
+    transition: padding 0.3s var(--transition-smooth), box-shadow 0.3s var(--transition-smooth);
   }
-  .navbar-brand { font-weight: 700; letter-spacing: 0.5px; }
+  .navbar.navbar-shrink {
+    padding: 0.3rem 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+  .navbar-brand { font-weight: 700; letter-spacing: 0.5px; transition: font-size 0.3s var(--transition-smooth); }
+  .navbar-shrink .navbar-brand { font-size: 1.2rem; }
   .navbar-nav .nav-link {
     font-weight: 500;
     color: rgba(255,255,255,0.8);
@@ -214,17 +551,124 @@
 </main>
 
 <!-- ── footer ── -->
-<footer class="bg-light py-3 text-center text-muted" style="border-top: 3px solid #fff;">
+<footer class="py-3 text-center">
   <div class="container">
     <p class="mb-0">
       HeartPredict &bull; UCI Heart Disease Dataset &bull; Gradient Boosting Classifier
-      &bull; <span class="text-danger fw-semibold">Not a medical tool</span>
+      &bull; <span class="text-warning fw-semibold">Not a medical tool</span>
     </p>
   </div>
 </footer>
 
+{% if current_user.is_authenticated %}
+<!-- ── floating chat widget ── -->
+<div class="chat-fab" id="chatFab">
+  <button class="fab-btn" id="chatFabBtn" aria-label="Open Heart Health Assistant">
+    <i class="bi bi-heart-pulse-fill"></i>
+    <span class="pulse-ring"></span>
+  </button>
+  <span class="fab-tooltip">Ask the Heart Assistant</span>
+</div>
+
+<div class="chat-popup" id="chatPopup">
+  <div class="popup-header">
+    <div class="popup-avatar"><i class="bi bi-heart-pulse-fill"></i></div>
+    <div class="popup-info">
+      <h6>Heart Health Assistant</h6>
+      <small>AI-powered &middot; Educational guidance</small>
+    </div>
+    <button class="popup-close" id="chatPopupClose">&times;</button>
+  </div>
+  <div class="popup-messages" id="popupMessages">
+    <div class="msg bot">Hi! I'm your Heart Health Assistant. Ask me anything about heart disease, risk factors, or your results.</div>
+  </div>
+  <div class="popup-input-area">
+    <input type="text" id="popupInput" placeholder="Ask the assistant..." autocomplete="off">
+    <button id="popupSend">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+  <div class="popup-disclaimer"><strong>Educational only.</strong> Not a substitute for professional medical advice.</div>
+</div>
+
+<script>
+(function() {
+  const fabBtn = document.getElementById('chatFabBtn');
+  const popup = document.getElementById('chatPopup');
+  const closeBtn = document.getElementById('chatPopupClose');
+  const popupInput = document.getElementById('popupInput');
+  const popupSend = document.getElementById('popupSend');
+  const popupMessages = document.getElementById('popupMessages');
+  let ready = true;
+
+  function togglePopup() {
+    const isOpen = popup.classList.toggle('show');
+    if (isOpen) { popupInput.focus(); }
+  }
+
+  fabBtn.addEventListener('click', togglePopup);
+  closeBtn.addEventListener('click', togglePopup);
+
+  function addMsg(text, role) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + role;
+    div.textContent = text;
+    popupMessages.appendChild(div);
+    popupMessages.scrollTop = popupMessages.scrollHeight;
+  }
+
+  async function sendMsg(msg) {
+    if (!msg.trim() || !ready) return;
+    addMsg(msg, 'user');
+    popupInput.value = '';
+    popupSend.disabled = true;
+    ready = false;
+    try {
+      const resp = await fetch('/assistant/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, context: { page: 'floating_widget' } })
+      });
+      const data = await resp.json();
+      addMsg(data.response || 'Sorry, something went wrong.', 'bot');
+    } catch {
+      addMsg('Unable to reach the assistant. Please try again.', 'bot');
+    } finally {
+      popupSend.disabled = false;
+      ready = true;
+      popupInput.focus();
+    }
+  }
+
+  popupSend.addEventListener('click', function() { sendMsg(popupInput.value); });
+  popupInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') sendMsg(popupInput.value);
+  });
+})();
+</script>
+{% endif %}
+
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- AOS - Animate On Scroll -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init({
+    duration: 800,
+    easing: 'ease-out-cubic',
+    once: true,
+    offset: 60,
+    disable: 'mobile'
+  });
+
+  // Navbar shrink on scroll
+  let nav = document.querySelector('.navbar');
+  if (nav) {
+    window.addEventListener('scroll', function () {
+      nav.classList.toggle('navbar-shrink', window.scrollY > 60);
+    });
+  }
+</script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>
