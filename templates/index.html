@@ -1,392 +1,452 @@
 {% extends "base.html" %}
 {% block title %}HeartPredict – Home{% endblock %}
 
-{% block content %}
-
-<!-- Hero -->
+{% block extra_head %}
 <style>
-.hero {
-  position: relative;
-  background: url("{{ url_for('static', filename='images/heart-bg.png') }}") center/cover no-repeat;
-  color: #fff;
-  padding: 7rem 0 6rem;
-}
-
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(158, 59, 59, 0.75),
-    rgba(119, 140, 235, 0.75)
-  );
-}
-
-.hero .container {
-  position: relative;
-  z-index: 1;
-}
-</style>
-
-<div class="hero">
-  <i class="bi bi-heart-pulse-fill hero-float-icon"></i>
-  <div class="container text-start" data-aos="fade-up" data-aos-duration="1000">
-
-    <span class="badge bg-light text-primary mb-3 px-3 py-2">
-      AI-Powered Heart Analysis
-    </span>
-
-    <i class="bi bi-heart-pulse-fill display-3 mb-3"></i>
-
-    <h1 class="fw-bold">Heart Disease Risk Predictor</h1>
-
-    <p class="lead mt-3 mb-4" style="max-width:600px">
-      Assess your heart disease risk using clinically relevant health indicators in seconds.
-    </p>
-
-    <a href="{{ url_for('predict') }}"
-       class="btn btn-light btn-lg px-5 fw-semibold shadow-sm">
-      <i class="bi bi-clipboard2-pulse me-2"></i>Start Assessment
-    </a>
-
-  </div>
-</div>
-
-<!-- Heart health info section -->
-<style>
-  .quick-facts-bar {
-    background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
-    border-radius: 1rem;
+  /* ── hero ── */
+  .hero-home {
+    background: linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 45%, #2563EB 100%);
     color: #fff;
-    padding: 1.5rem 2rem;
-    margin-bottom: 2rem;
+    padding: 5rem 0 4rem;
+    position: relative;
+    overflow: hidden;
   }
-  .quick-facts-bar h5 {
-    font-weight: 700;
-    font-size: 1rem;
+  .hero-home::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("{{ url_for('static', filename='images/heart-bg.png') }}") center/cover no-repeat;
+    opacity: 0.06;
+    pointer-events: none;
+  }
+  .hero-home .container { position: relative; z-index: 1; }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.25);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    letter-spacing: 0.3px;
+    margin-bottom: 1.25rem;
+  }
+  .hero-stat {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    text-align: center;
+    backdrop-filter: blur(8px);
+  }
+  .hero-stat .val {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+  .hero-stat .lbl {
+    font-size: 0.72rem;
+    font-weight: 600;
+    opacity: 0.75;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 0.75rem;
+    margin-top: 0.3rem;
   }
-  .quick-facts-bar ul {
-    margin: 0;
-    padding-left: 1.2rem;
+  .hero-float {
+    position: absolute;
+    font-size: 16rem;
+    opacity: 0.04;
+    right: -3rem;
+    bottom: -3rem;
+    pointer-events: none;
+    animation: heroFloat 8s ease-in-out infinite;
   }
-  .quick-facts-bar li {
-    font-size: 0.95rem;
-    margin-bottom: 0.25rem;
-    opacity: 0.95;
+  @keyframes heroFloat {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50%       { transform: translateY(-18px) rotate(5deg); }
   }
 
+  /* ── info sections ── */
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    height: 100%;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .info-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+  .info-card .ic-icon {
+    width: 38px; height: 38px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    margin-bottom: 0.65rem;
+  }
+  .info-card strong { font-size: 0.875rem; display: block; margin-bottom: 0.2rem; }
+  .info-card p { font-size: 0.8rem; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+
+  /* ── risk table ── */
   .risk-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    border-radius: 0.75rem;
+    border-radius: var(--radius);
     overflow: hidden;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    border: 1px solid var(--border);
   }
   .risk-table thead th {
-    background: #343a40;
-    color: #fff;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    background: var(--bg);
+    font-size: 0.72rem;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
     padding: 0.85rem 1rem;
-    border: none;
+    border-bottom: 1px solid var(--border);
   }
   .risk-table tbody td {
-    padding: 0.85rem 1rem;
-    font-size: 0.9rem;
+    padding: 0.9rem 1rem;
+    font-size: 0.875rem;
     vertical-align: middle;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--border);
   }
-  .risk-table tbody tr:last-child td {
-    border-bottom: none;
-  }
-  .risk-row-low     { background: #d4edda; }
-  .risk-row-medium  { background: #fff3cd; }
-  .risk-row-high    { background: #f8a9a9; }
+  .risk-table tbody tr:last-child td { border-bottom: none; }
+  .risk-table tbody tr:hover td { background: var(--bg); }
 
-  .risk-badge {
-    display: inline-block;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 0.2rem 0.55rem;
-    border-radius: 0.4rem;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+  /* ── news ── */
+  .news-card { overflow: hidden; }
+  .news-card .news-img {
+    height: 180px;
+    object-fit: cover;
+    width: 100%;
   }
-  .risk-badge-low       { background: #28a745; color: #fff; }
-  .risk-badge-medium    { background: #fd7e14; color: #fff; }
-  .risk-badge-high      { background: #dc3545; color: #fff; }
-
-  .info-section-title {
-    font-size: 0.75rem;
-    font-weight: 700;
+  .news-placeholder {
+    height: 180px;
+    background: var(--primary-light);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--primary);
+    font-size: 2.5rem;
+  }
+  .news-source {
+    font-size: 0.72rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #6c757d;
-    border-bottom: 2px solid #dee2e6;
-    padding-bottom: 0.4rem;
-    margin-bottom: 1rem;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+  }
+
+  /* ── section title ── */
+  .section-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    margin-bottom: 0.35rem;
+  }
+  .section-sub {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0;
   }
 </style>
+{% endblock %}
 
-<div class="container mt-5">
+{% block content %}
 
-  <!-- Quick Facts Bar -->
-  <div class="quick-facts-bar" data-aos="fade-up">
-    <h5><i class="bi bi-lightning-fill me-2"></i>Quick Facts</h5>
-    <div class="row g-3">
-      <div class="col-md-6">
-        <ul>
-          <li>Heart disease is the leading cause of death globally, responsible for an estimated 17.9 million deaths each year.</li>
-          <li>Up to 80% of premature heart disease and strokes are preventable through lifestyle changes.</li>
-        </ul>
+<!-- ── Hero ── -->
+<div class="hero-home">
+  <i class="bi bi-heart-pulse-fill hero-float"></i>
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7" data-aos="fade-up">
+        <div class="hero-badge">
+          <i class="bi bi-cpu-fill"></i> AI-Powered Heart Analysis
+        </div>
+        <h1 class="fw-bold mb-3" style="font-size:2.5rem;letter-spacing:-0.5px;line-height:1.15;">
+          Heart Disease<br>Risk Predictor
+        </h1>
+        <p class="mb-4" style="font-size:1rem;opacity:.85;max-width:480px;line-height:1.65;">
+          Assess your heart disease risk using 13 clinically validated indicators.
+          Powered by Gradient Boosting with SHAP explainability.
+        </p>
+        <a href="{{ url_for('predict') }}"
+           class="btn btn-light btn-lg px-5 fw-bold shadow-sm"
+           style="color:var(--primary);border-radius:var(--radius);">
+          <i class="bi bi-clipboard2-pulse-fill me-2"></i>Start Assessment
+        </a>
       </div>
-      <div class="col-md-6">
-        <ul>
-          <li>Many heart conditions show no symptoms until serious damage has already occurred.</li>
-          <li>Regular screening and risk assessment can detect problems early when they are most treatable.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
 
-  <!-- Main content card -->
-  <div class="card border-0 shadow-sm p-4 p-md-5" data-aos="fade-up" data-aos-delay="100">
-
-    <!-- Understanding Your Heart Disease Risk -->
-    <h3 class="fw-bold mb-3" data-aos="fade-up">Understanding Your Heart Disease Risk</h3>
-    <p class="text-muted mb-4">
-      Heart disease risk is influenced by a combination of factors including age, blood pressure, cholesterol,
-      chest pain type, exercise capacity, and more. Our assessment tool analyses these clinical indicators to
-      estimate your personal risk level and shows which factors contribute the most.
-    </p>
-
-    <!-- Risk Level Categories -->
-    <div class="table-responsive mb-5" data-aos="fade-up" data-aos-delay="150">
-      <table class="risk-table">
-        <thead>
-          <tr>
-            <th>Risk Level</th>
-            <th>Predicted Probability</th>
-            <th>What It Means</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="risk-row-low">
-            <td><span class="risk-badge risk-badge-low">Low Risk</span></td>
-            <td>Below 35%</td>
-            <td>Your clinical indicators suggest a lower likelihood of heart disease. Continue maintaining heart-healthy habits.</td>
-          </tr>
-          <tr class="risk-row-medium">
-            <td><span class="risk-badge risk-badge-medium">Medium Risk</span></td>
-            <td>35% – 65%</td>
-            <td>Some risk factors are present. Discuss your results with a healthcare provider and consider lifestyle adjustments.</td>
-          </tr>
-          <tr class="risk-row-high">
-            <td><span class="risk-badge risk-badge-high">High Risk</span></td>
-            <td>Above 65%</td>
-            <td>Significant risk factors detected. Consult a healthcare professional promptly for further cardiac evaluation.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Key Risk Factors -->
-    <div class="mb-4">
-      <div class="info-section-title">Key Risk Factors</div>
-      <div class="row g-3">
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
-          <div class="p-3 rounded-4 bg-light h-100">
-            <i class="bi bi-calendar3 text-primary me-2"></i>
-            <strong>Age</strong>
-            <p class="text-muted mb-0 small">Risk increases with age as arteries naturally stiffen over time.</p>
+      <!-- Model stats -->
+      <div class="col-lg-5" data-aos="fade-up" data-aos-delay="150">
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="hero-stat">
+              <div class="val">91.7%</div>
+              <div class="lbl">ROC-AUC Score</div>
+            </div>
           </div>
-        </div>
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-          <div class="p-3 rounded-4 bg-light h-100">
-            <i class="bi bi-activity text-danger me-2"></i>
-            <strong>High Blood Pressure</strong>
-            <p class="text-muted mb-0 small">Forces the heart to work harder, damaging arteries over time.</p>
+          <div class="col-6">
+            <div class="hero-stat">
+              <div class="val">87.2%</div>
+              <div class="lbl">F1 Score</div>
+            </div>
           </div>
-        </div>
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
-          <div class="p-3 rounded-4 bg-light h-100">
-            <i class="bi bi-droplet-fill text-warning me-2"></i>
-            <strong>High Cholesterol</strong>
-            <p class="text-muted mb-0 small">Leads to plaque buildup that narrows and blocks arteries.</p>
+          <div class="col-6">
+            <div class="hero-stat">
+              <div class="val">13</div>
+              <div class="lbl">Clinical Features</div>
+            </div>
           </div>
-        </div>
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="400">
-          <div class="p-3 rounded-4 bg-light h-100">
-            <i class="bi bi-heart-pulse-fill text-success me-2"></i>
-            <strong>Chest Pain Type</strong>
-            <p class="text-muted mb-0 small">Certain types of chest pain are strong indicators of heart disease.</p>
-          </div>
-        </div>
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="500">
-          <div class="p-3 rounded-4 bg-light h-100">
-            <i class="bi bi-speedometer2 text-info me-2"></i>
-            <strong>Max Heart Rate</strong>
-            <p class="text-muted mb-0 small">Lower maximum heart rate during exercise may indicate reduced cardiac fitness.</p>
-          </div>
-        </div>
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="600">
-          <div class="p-3 rounded-4 bg-light h-100">
-            <i class="bi bi-graph-down-arrow text-secondary me-2"></i>
-            <strong>ST Depression</strong>
-            <p class="text-muted mb-0 small">Abnormal ECG readings during stress testing signal potential heart issues.</p>
+          <div class="col-6">
+            <div class="hero-stat">
+              <div class="val">SHAP</div>
+              <div class="lbl">Explainability</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Warning Signs -->
-    <div class="mb-4">
-      <div class="info-section-title" data-aos="fade-up">Warning Signs of Heart Disease</div>
-      <div class="row g-3">
-        <div class="col-md-6" data-aos="fade-up" data-aos-delay="100">
-          <div class="p-3 rounded-4 bg-light h-100">
-            <ul class="list-unstyled mb-0">
-              <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Chest pain, pressure, or tightness</li>
-              <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Shortness of breath</li>
-              <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Pain radiating to arm, neck, or jaw</li>
-              <li><i class="bi bi-x-circle-fill text-danger me-2"></i>Dizziness or fainting</li>
-            </ul>
-          </div>
-        </div>
-        <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
-          <div class="p-3 rounded-4 bg-light h-100">
-            <ul class="list-unstyled mb-0">
-              <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Unusual fatigue or weakness</li>
-              <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Irregular heartbeat or palpitations</li>
-              <li class="mb-2"><i class="bi bi-x-circle-fill text-danger me-2"></i>Swelling in legs, ankles, or feet</li>
-              <li><i class="bi bi-x-circle-fill text-danger me-2"></i>Nausea, cold sweats, or indigestion</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Prevention Tips -->
-    <div>
-      <div class="info-section-title" data-aos="fade-up">Heart-Healthy Prevention</div>
-      <div class="row g-3">
-        <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
-          <div class="p-3 rounded-4 bg-light text-center h-100">
-            <i class="bi bi-apple text-success fs-4 d-block mb-2"></i>
-            <strong class="d-block">Healthy Diet</strong>
-            <small class="text-muted">Low sodium, whole grains, fruits, and vegetables</small>
-          </div>
-        </div>
-        <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
-          <div class="p-3 rounded-4 bg-light text-center h-100">
-            <i class="bi bi-bicycle text-primary fs-4 d-block mb-2"></i>
-            <strong class="d-block">Regular Exercise</strong>
-            <small class="text-muted">At least 150 minutes of moderate activity per week</small>
-          </div>
-        </div>
-        <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
-          <div class="p-3 rounded-4 bg-light text-center h-100">
-            <i class="bi bi-bandaid text-warning fs-4 d-block mb-2"></i>
-            <strong class="d-block">Regular Screening</strong>
-            <small class="text-muted">Monitor cholesterol, BP, and blood sugar annually</small>
-          </div>
-        </div>
-        <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="400">
-          <div class="p-3 rounded-4 bg-light text-center h-100">
-            <i class="bi bi-emoji-smile text-info fs-4 d-block mb-2"></i>
-            <strong class="d-block">Manage Stress</strong>
-            <small class="text-muted">Practice mindfulness, adequate rest, and work-life balance</small>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>
 
-<!-- Heart health news -->
-<div class="container mt-5 mb-4" data-aos="fade-up">
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <div>
-      <h2 class="fw-bold mb-1">Latest Heart Health News</h2>
-      <p class="text-muted mb-0">
-        Recent articles related to heart disease, cardiology, blood pressure, and prevention.
-      </p>
-    </div>
-    <span class="badge bg-light text-primary border px-3 py-2">
-      <i class="bi bi-newspaper me-1"></i> Heart-focused updates
-    </span>
-  </div>
-
-  {% if news %}
-    <div class="row g-4">
-      {% for article in news %}
-        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ 100 * (loop.index0 % 3) }}">
-          <div class="card h-100 shadow-sm border-0">
-            {% if article.image %}
-              <img src="{{ article.image }}" class="card-img-top" alt="News image"
-                   style="height: 200px; object-fit: cover;">
-            {% else %}
-              <div class="bg-light d-flex align-items-center justify-content-center"
-                   style="height: 200px;">
-                <i class="bi bi-heart-pulse text-primary" style="font-size: 3rem;"></i>
+<!-- ── Quick Facts ── -->
+<div class="container mt-5">
+  <div class="card border-0" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff;"
+       data-aos="fade-up">
+    <div class="card-body p-4">
+      <div class="row align-items-center g-3">
+        <div class="col-md-auto">
+          <div class="d-flex align-items-center gap-2 mb-2 mb-md-0">
+            <i class="bi bi-lightning-charge-fill fs-4"></i>
+            <span class="fw-bold" style="font-size:0.9rem;letter-spacing:0.3px;">KEY FACTS</span>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="d-flex align-items-start gap-2">
+                <i class="bi bi-dot fs-4 flex-shrink-0" style="margin-top:-4px;"></i>
+                <span style="font-size:0.875rem;opacity:.9;">Heart disease causes <strong>17.9 million</strong> deaths annually — the world's leading cause of death.</span>
               </div>
-            {% endif %}
-
-            <div class="card-body d-flex flex-column">
-              <div class="small text-muted mb-2">
-                <span class="fw-semibold">{{ article.source }}</span>
-                {% if article.published_at %}
-                  • {{ article.published_at }}
-                {% endif %}
-              </div>
-
-              <h5 class="card-title fw-bold">{{ article.title }}</h5>
-              <p class="card-text text-muted">
-                {{ article.description[:140] }}{% if article.description|length > 140 %}...{% endif %}
-              </p>
-
-              <div class="mt-auto pt-2">
-                <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer"
-                   class="btn btn-outline-primary btn-sm">
-                  Read More <i class="bi bi-box-arrow-up-right ms-1"></i>
-                </a>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex align-items-start gap-2">
+                <i class="bi bi-dot fs-4 flex-shrink-0" style="margin-top:-4px;"></i>
+                <span style="font-size:0.875rem;opacity:.9;">Up to <strong>80%</strong> of premature heart disease is preventable through lifestyle changes.</span>
               </div>
             </div>
           </div>
         </div>
-      {% endfor %}
+      </div>
     </div>
-  {% else %}
-    <div class="alert alert-light border">
-      <div class="d-flex align-items-start gap-3">
-        <i class="bi bi-info-circle-fill text-primary fs-4 mt-1"></i>
-        <div>
-          <strong>No heart-health news available right now.</strong><br>
-          Please check that your News API key is set correctly, or try again later.
+  </div>
+</div>
+
+<!-- ── Main Content ── -->
+<div class="container mt-5">
+
+  <!-- Understanding Risk -->
+  <div class="row align-items-start g-5 mb-5">
+    <div class="col-lg-5" data-aos="fade-up">
+      <h2 class="section-title">Understanding Your Risk</h2>
+      <p class="section-sub mb-4">
+        Heart disease risk is shaped by a combination of clinical indicators. Our model analyzes
+        these measurements and shows you exactly which factors matter most.
+      </p>
+      <div class="table-responsive">
+        <table class="risk-table">
+          <thead>
+            <tr>
+              <th>Risk Level</th>
+              <th>Probability</th>
+              <th>Guidance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="badge risk-Low rounded-pill px-3">Low</span>
+              </td>
+              <td style="font-weight:600;color:var(--success);">&lt; 35%</td>
+              <td style="font-size:0.82rem;color:var(--text-secondary);">Maintain healthy habits, regular check-ups.</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="badge risk-Medium rounded-pill px-3">Medium</span>
+              </td>
+              <td style="font-weight:600;color:var(--warning);">35 – 65%</td>
+              <td style="font-size:0.82rem;color:var(--text-secondary);">Discuss results with your doctor.</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="badge risk-High rounded-pill px-3">High</span>
+              </td>
+              <td style="font-weight:600;color:var(--danger);">&gt; 65%</td>
+              <td style="font-size:0.82rem;color:var(--text-secondary);">Seek cardiac evaluation promptly.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="col-lg-7" data-aos="fade-up" data-aos-delay="100">
+      <h2 class="section-title">Key Risk Factors</h2>
+      <p class="section-sub mb-4">The 13 clinical features our model analyzes for each assessment.</p>
+      <div class="row g-2">
+        {% set factors = [
+          ('calendar3',         'primary', 'Age',              'Risk increases as arteries naturally stiffen over time.'),
+          ('activity',          'danger',  'Blood Pressure',   'High BP forces the heart to overwork, damaging arteries.'),
+          ('droplet-fill',      'warning', 'Cholesterol',      'Elevated cholesterol leads to artery-narrowing plaque.'),
+          ('heart-pulse-fill',  'success', 'Chest Pain Type',  'Specific pain patterns are strong cardiac indicators.'),
+          ('speedometer2',      'info',    'Max Heart Rate',   'Reduced exercise capacity may signal cardiac stress.'),
+          ('graph-down-arrow',  'secondary','ST Depression',   'Abnormal ECG stress readings indicate potential issues.')
+        ] %}
+        {% for icon, color, name, desc in factors %}
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="{{ 50 * loop.index }}">
+          <div class="info-card d-flex align-items-start gap-3">
+            <div class="ic-icon bg-{{ color }} bg-opacity-10 text-{{ color }}">
+              <i class="bi bi-{{ icon }}"></i>
+            </div>
+            <div>
+              <strong>{{ name }}</strong>
+              <p>{{ desc }}</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Warning Signs + Prevention -->
+  <div class="row g-4 mb-5">
+    <div class="col-lg-6" data-aos="fade-up">
+      <div class="card h-100">
+        <div class="card-header d-flex align-items-center gap-2">
+          <div class="stat-icon bg-danger bg-opacity-10 text-danger" style="width:32px;height:32px;font-size:.9rem;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+          </div>
+          <span class="fw-bold">Warning Signs</span>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-2">
+            {% for sign in ['Chest pain, pressure, or tightness', 'Shortness of breath', 'Pain radiating to arm, neck, or jaw', 'Dizziness or fainting', 'Unusual fatigue or weakness', 'Irregular heartbeat', 'Swelling in legs or ankles', 'Nausea or cold sweats'] %}
+            <div class="col-sm-6">
+              <div class="d-flex align-items-start gap-2" style="font-size:0.84rem;">
+                <i class="bi bi-x-circle-fill text-danger flex-shrink-0 mt-1" style="font-size:0.8rem;"></i>
+                <span>{{ sign }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
         </div>
       </div>
     </div>
-  {% endif %}
-</div>
 
-<!-- Disclaimer -->
-<div class="container mt-4" data-aos="fade-up">
-  <div class="alert alert-warning d-flex align-items-start gap-3" role="alert">
-    <i class="bi bi-exclamation-triangle-fill fs-4 mt-1 flex-shrink-0"></i>
+    <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+      <div class="card h-100">
+        <div class="card-header d-flex align-items-center gap-2">
+          <div class="stat-icon bg-success bg-opacity-10 text-success" style="width:32px;height:32px;font-size:.9rem;">
+            <i class="bi bi-heart-fill"></i>
+          </div>
+          <span class="fw-bold">Prevention Tips</span>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-3">
+            {% for icon, color, title, desc in [
+              ('apple', 'success', 'Healthy Diet', 'Low sodium, whole grains, fruits & vegetables'),
+              ('bicycle', 'primary', 'Exercise', '150+ minutes of moderate activity weekly'),
+              ('bandaid', 'warning', 'Screening', 'Annual cholesterol, BP, and blood sugar checks'),
+              ('emoji-smile', 'info', 'Manage Stress', 'Mindfulness, adequate sleep, work-life balance')
+            ] %}
+            <div class="col-sm-6">
+              <div class="d-flex align-items-start gap-3">
+                <div class="stat-icon bg-{{ color }} bg-opacity-10 text-{{ color }}"
+                     style="width:36px;height:36px;font-size:1rem;flex-shrink:0;border-radius:var(--radius-sm);">
+                  <i class="bi bi-{{ icon }}"></i>
+                </div>
+                <div>
+                  <div class="fw-semibold" style="font-size:0.875rem;">{{ title }}</div>
+                  <div class="text-muted" style="font-size:0.78rem;">{{ desc }}</div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- News -->
+  <div class="mb-5" data-aos="fade-up">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <h2 class="section-title mb-1">Latest Heart Health News</h2>
+        <p class="section-sub">Recent articles on cardiology, blood pressure, and prevention.</p>
+      </div>
+      <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2" style="font-size:0.75rem;">
+        <i class="bi bi-newspaper me-1"></i>Live feed
+      </span>
+    </div>
+
+    {% if news %}
+    <div class="row g-4">
+      {% for article in news %}
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ 80 * (loop.index0 % 3) }}">
+        <div class="card news-card h-100">
+          {% if article.image %}
+            <img src="{{ article.image }}" class="news-img" alt="">
+          {% else %}
+            <div class="news-placeholder">
+              <i class="bi bi-heart-pulse"></i>
+            </div>
+          {% endif %}
+          <div class="card-body d-flex flex-column p-4">
+            <div class="news-source mb-1">
+              {{ article.source }}
+              {% if article.published_at %}&bull; {{ article.published_at }}{% endif %}
+            </div>
+            <h6 class="fw-bold mb-2" style="line-height:1.4;font-size:0.92rem;">{{ article.title }}</h6>
+            <p class="text-muted mb-0 flex-grow-1" style="font-size:0.82rem;">
+              {{ article.description[:130] }}{% if article.description|length > 130 %}…{% endif %}
+            </p>
+            <div class="mt-3">
+              <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer"
+                 class="btn btn-outline-primary btn-sm">
+                Read More <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info d-flex align-items-start gap-3">
+      <i class="bi bi-info-circle-fill fs-5 flex-shrink-0 mt-1"></i>
+      <div>
+        <strong>No news available right now.</strong><br>
+        <span style="font-size:0.85rem;">Please check your News API key or try again later.</span>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="alert alert-warning d-flex align-items-start gap-3 mb-2" data-aos="fade-up">
+    <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0 mt-1"></i>
     <div>
       <strong>Medical Disclaimer:</strong> This tool is for <em>educational purposes only</em>
       and does not constitute medical advice. Always consult a licensed healthcare professional
       for any health concerns.
     </div>
   </div>
-</div>
 
+</div>
 {% endblock %}

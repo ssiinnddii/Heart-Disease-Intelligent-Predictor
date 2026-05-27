@@ -1,84 +1,196 @@
 {% extends "base.html" %}
 {% block title %}HeartPredict – History{% endblock %}
 
-{% block content %}
-<div class="container py-5">
+{% block extra_head %}
+<style>
+  .page-hero {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 0 1.75rem;
+  }
+  .page-hero h1 {
+    font-size: 1.65rem;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    margin-bottom: 0.3rem;
+  }
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold mb-0">
-      <i class="bi bi-clock-history text-primary me-2"></i>Prediction History
-    </h2>
-    {% if records %}
-    <form method="POST" action="{{ url_for('clear_history') }}"
-          onsubmit="return confirm('Clear all records?')">
-      <button type="submit" class="btn btn-sm btn-outline-danger">
-        <i class="bi bi-trash me-1"></i>Clear All
-      </button>
-    </form>
-    {% endif %}
+  .prob-bar-wrap { display: flex; align-items: center; gap: 0.6rem; }
+  .prob-bar-track {
+    width: 80px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .prob-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<div class="page-hero">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <h1>
+          <i class="bi bi-clock-history me-2" style="color:var(--primary);"></i>Assessment History
+        </h1>
+        <p style="color:var(--text-secondary);font-size:0.9rem;margin:0;">
+          All your past heart disease risk assessments
+        </p>
+      </div>
+      {% if records %}
+      <form method="POST" action="{{ url_for('clear_history') }}"
+            onsubmit="return confirm('This will permanently delete all your assessment records. Continue?')">
+        <button type="submit" class="btn btn-sm btn-outline-danger">
+          <i class="bi bi-trash me-1"></i>Clear All
+        </button>
+      </form>
+      {% endif %}
+    </div>
   </div>
+</div>
+
+<div class="container py-4">
 
   {% if not records %}
-    <div class="card text-center p-5 text-muted">
-      <i class="bi bi-inbox display-3 mb-3"></i>
-      <p class="mb-3">No predictions yet.</p>
-      <a href="{{ url_for('predict') }}" class="btn btn-primary">Make First Prediction</a>
+  <!-- Empty state -->
+  <div class="card text-center py-5 px-4" style="border-style:dashed !important;">
+    <div class="stat-icon bg-primary bg-opacity-10 text-primary mx-auto mb-3"
+         style="width:56px;height:56px;font-size:1.5rem;border-radius:var(--radius);">
+      <i class="bi bi-inbox"></i>
     </div>
+    <h5 class="fw-bold mb-1">No assessments yet</h5>
+    <p class="text-muted mb-4" style="font-size:0.875rem;">
+      Run your first heart health assessment to see results here.
+    </p>
+    <div>
+      <a href="{{ url_for('predict') }}" class="btn btn-primary px-4">
+        <i class="bi bi-clipboard2-pulse me-2"></i>Start Assessment
+      </a>
+    </div>
+  </div>
+
   {% else %}
-    <div class="card">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
-            <tr>
-              <th>#</th>
-              <th>Date / Time</th>
-              <th>Prediction</th>
-              <th>Risk Level</th>
-              <th>Probability</th>
-              <th>Key Inputs</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for rec in records %}
-            <tr>
-              <td class="text-muted small">{{ rec.id }}</td>
-              <td class="small">{{ rec.created_at }}</td>
-              <td>
-                {% if rec.prediction == 1 %}
-                  <span class="badge bg-danger">Disease</span>
-                {% else %}
-                  <span class="badge bg-success">No Disease</span>
-                {% endif %}
-              </td>
-              <td>
-                <span class="badge risk-{{ rec.risk_level }} rounded-pill px-3 py-2">
-                  {{ rec.risk_level }}
-                </span>
-              </td>
-              <td>
-                <div class="progress" style="width:90px; height:.7rem;">
-<div class="progress-bar
-                      {% if rec.risk_level == 'Low' %}bg-success
-                      {% elif rec.risk_level == 'Medium' %}bg-warning
-                      {% else %}bg-danger{% endif %}"
-                    style="width:{{ rec.probability }}%">
-                  </div>
-                </div>
-                <small class="text-muted">{{ rec.probability }}%</small>
-              </td>
-              <td class="small text-muted">
-                Age {{ rec.input_data.age }},
-                {{ rec.input_data.sex }},
-                {{ rec.input_data.cp }}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+
+  <!-- Summary stats -->
+  {% set total    = records | length %}
+  {% set high_c   = records | selectattr('risk_level', 'equalto', 'High')   | list | length %}
+  {% set medium_c = records | selectattr('risk_level', 'equalto', 'Medium') | list | length %}
+  {% set low_c    = records | selectattr('risk_level', 'equalto', 'Low')    | list | length %}
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+          <i class="bi bi-clipboard2-pulse"></i>
+        </div>
+        <div>
+          <div class="stat-value">{{ total }}</div>
+          <div class="stat-label">Total</div>
+        </div>
       </div>
     </div>
-    <p class="text-muted small mt-2">Showing last 100 records.</p>
-  {% endif %}
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+          <i class="bi bi-exclamation-octagon-fill"></i>
+        </div>
+        <div>
+          <div class="stat-value" style="color:var(--danger);">{{ high_c }}</div>
+          <div class="stat-label">High Risk</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+          <i class="bi bi-dash-circle-fill"></i>
+        </div>
+        <div>
+          <div class="stat-value" style="color:var(--warning);">{{ medium_c }}</div>
+          <div class="stat-label">Medium Risk</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon bg-success bg-opacity-10 text-success">
+          <i class="bi bi-shield-check-fill"></i>
+        </div>
+        <div>
+          <div class="stat-value" style="color:var(--success);">{{ low_c }}</div>
+          <div class="stat-label">Low Risk</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- Records table -->
+  <div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <span class="fw-semibold">Records</span>
+      <span class="text-muted" style="font-size:0.8rem;">Last 100 results</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date &amp; Time</th>
+            <th>Outcome</th>
+            <th>Risk Level</th>
+            <th>Probability</th>
+            <th>Key Inputs</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rec in records %}
+          <tr>
+            <td class="text-muted" style="font-size:0.8rem;font-weight:500;">{{ rec.id }}</td>
+            <td style="font-size:0.82rem;white-space:nowrap;">{{ rec.created_at }}</td>
+            <td>
+              {% if rec.prediction == 1 %}
+                <span class="badge risk-High">Disease</span>
+              {% else %}
+                <span class="badge risk-Low">No Disease</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge risk-{{ rec.risk_level }} px-3">{{ rec.risk_level }}</span>
+            </td>
+            <td>
+              <div class="prob-bar-wrap">
+                <div class="prob-bar-track">
+                  <div class="prob-bar-fill
+                    {% if rec.risk_level == 'Low' %}bg-success
+                    {% elif rec.risk_level == 'Medium' %}bg-warning
+                    {% else %}bg-danger{% endif %}"
+                    style="width:{{ rec.probability }}%;">
+                  </div>
+                </div>
+                <span style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;">
+                  {{ rec.probability }}%
+                </span>
+              </div>
+            </td>
+            <td style="font-size:0.82rem;color:var(--text-secondary);">
+              Age {{ rec.input_data.age }},
+              {{ rec.input_data.sex }},
+              {{ rec.input_data.cp }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% endif %}
 </div>
 {% endblock %}

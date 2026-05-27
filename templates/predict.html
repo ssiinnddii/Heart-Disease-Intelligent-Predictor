@@ -1,51 +1,161 @@
 {% extends "base.html" %}
-{% block title %}HeartPredict – Predict{% endblock %}
+{% block title %}HeartPredict – Assessment{% endblock %}
 
 {% block extra_head %}
-  <style>
-    .hero-predict {
-      position: relative;
-      background: url("{{ url_for('static', filename='images/heart-bg.png') }}") center/cover no-repeat;
-      color: #fff;
-      padding: 4rem 0 3rem;
-    }
-    .hero-predict::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(26, 115, 232, 0.85), rgba(13, 71, 161, 0.85));
-    }
-    .hero-predict .container { position: relative; z-index: 1; }
-  </style>
-  <!-- HTMX – lets us submit the form and swap the result without a full page reload -->
-  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<style>
+  .page-hero {
+    background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+    color: #fff;
+    padding: 3rem 0 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("{{ url_for('static', filename='images/heart-bg.png') }}") center/cover no-repeat;
+    opacity: 0.05;
+  }
+  .page-hero .container { position: relative; z-index: 1; }
+
+  /* step indicator */
+  .step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 2rem;
+  }
+  .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+  }
+  .step-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+  .step-item.done:not(:last-child)::after { background: var(--primary); }
+  .step-dot {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    position: relative;
+    z-index: 1;
+    transition: all 0.2s;
+  }
+  .step-item.active .step-dot {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 0 0 4px var(--primary-light);
+  }
+  .step-item.done .step-dot {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #fff;
+  }
+  .step-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.4rem;
+    text-align: center;
+  }
+  .step-item.active .step-label { color: var(--primary); }
+
+  /* form sections */
+  .form-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+  }
+  .form-section-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .form-section-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .form-section-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.2px;
+    margin: 0;
+  }
+  .form-section-body { padding: 1.5rem; }
+
+  /* htmx spinner */
+  .htmx-indicator { display: none; }
+  .htmx-request .htmx-indicator { display: flex; }
+  .htmx-request.htmx-indicator { display: flex; }
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="hero-predict">
+
+<!-- Hero -->
+<div class="page-hero">
   <div class="container text-center">
-    <i class="bi bi-clipboard2-pulse-fill display-3 mb-3"></i>
-    <h1 class="fw-bold">Start Your Heart Health Assessment</h1>
-    <p class="lead mb-0">Enter your clinical measurements to receive an AI-powered risk assessment</p>
+    <i class="bi bi-clipboard2-pulse-fill" style="font-size:2.5rem;opacity:.9;"></i>
+    <h1 class="fw-bold mt-2 mb-2" style="font-size:1.9rem;letter-spacing:-0.3px;">Heart Health Assessment</h1>
+    <p class="mb-0" style="opacity:.8;font-size:0.9rem;">Enter your clinical measurements to receive an AI-powered risk assessment</p>
   </div>
 </div>
 
-<div class="container py-5" style="max-width:780px">
+<div class="container py-5" style="max-width:800px;">
 
-  <p class="text-muted mb-4">
-    Fill in the 13 clinical measurements below and click <strong>Predict</strong>.
-    Fields marked <span class="text-danger">*</span> are required; others use
-    training-set medians when left blank.
+  <p class="text-muted mb-4" style="font-size:0.875rem;">
+    Fill in the 13 clinical measurements below and click <strong>Run Assessment</strong>.
+    Fields marked <span class="text-danger fw-semibold">*</span> are required.
+    Optional fields use training-set medians when left blank.
   </p>
 
-  <!--
-    HTMX attributes on the form:
-      hx-post       – where to POST (the /predict endpoint)
-      hx-target     – which element to replace with the server response
-      hx-swap       – how to replace (innerHTML replaces the content inside #result-box)
-      hx-indicator  – show a spinner while waiting
-  -->
+  <!-- Step indicator -->
+  <div class="step-indicator">
+    <div class="step-item active">
+      <div class="step-dot">1</div>
+      <div class="step-label">About You</div>
+    </div>
+    <div class="step-item active">
+      <div class="step-dot">2</div>
+      <div class="step-label">Measurements</div>
+    </div>
+    <div class="step-item active">
+      <div class="step-dot">3</div>
+      <div class="step-label">Heart Tests</div>
+    </div>
+  </div>
+
   <form
     hx-post="{{ url_for('predict') }}"
     hx-target="#result-box"
@@ -54,192 +164,164 @@
     hx-headers='{"Accept": "text/html"}'
   >
 
-    <!-- ── Section 1: Demographics ── -->
-    <div class="card mb-4 p-4">
-      <div class="section-header">About You</div>
-      <div class="row g-3">
-
-        <div class="col-md-4">
-          <label class="form-label fw-semibold" for="age">
-            What's your age? <span class="text-danger">*</span>
-          </label>
-          <input type="number" class="form-control" id="age" name="age"
-                 min="18" max="100" placeholder="e.g. 55" required />
-          <div class="form-text">Typical range: 28 – 77 years</div>
+    <!-- Section 1: About You -->
+    <div class="form-section" data-aos="fade-up">
+      <div class="form-section-header">
+        <div class="form-section-num">1</div>
+        <div class="form-section-title">About You</div>
+      </div>
+      <div class="form-section-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label" for="age">Age <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" id="age" name="age"
+                   min="18" max="100" placeholder="e.g. 55" required />
+            <div class="form-text">Typical range: 28 – 77 years</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="sex">Biological Sex <span class="text-danger">*</span></label>
+            <select class="form-select" id="sex" name="sex" required>
+              <option value="" disabled selected>Choose…</option>
+              {% for opt in meta.categories.sex %}
+                <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="cp">Chest Pain Type <span class="text-danger">*</span></label>
+            <select class="form-select" id="cp" name="cp" required>
+              <option value="" disabled selected>Choose…</option>
+              {% for opt in meta.categories.cp %}
+                <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+            <div class="form-text">Pain during activity or at rest</div>
+          </div>
         </div>
-
-        <div class="col-md-4">
-          <label class="form-label fw-semibold" for="sex">
-            What's your sex? <span class="text-danger">*</span>
-          </label>
-          <select class="form-select" id="sex" name="sex" required>
-            <option value="" disabled selected>Choose…</option>
-            {% for opt in meta.categories.sex %}
-              <option value="{{ opt }}">{{ opt }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label fw-semibold" for="cp">
-            What type of chest pain do you experience? <span class="text-danger">*</span>
-          </label>
-          <select class="form-select" id="cp" name="cp" required>
-            <option value="" disabled selected>Choose…</option>
-            {% for opt in meta.categories.cp %}
-              <option value="{{ opt }}">{{ opt }}</option>
-            {% endfor %}
-          </select>
-          <div class="form-text">Chest pain during physical activity or rest</div>
-        </div>
-
       </div>
     </div>
 
-    <!-- ── Section 2: Vital Signs ── -->
-    <div class="card mb-4 p-4">
-      <div class="section-header">Health Measurements</div>
-      <div class="row g-3">
-
-        <div class="col-md-4">
-          <label class="form-label fw-semibold" for="trestbps">
-            What's your resting blood pressure?
-          </label>
-          <div class="input-group">
-            <input type="number" class="form-control" id="trestbps" name="trestbps"
-                   min="80" max="250" placeholder="e.g. 130" />
-            <span class="input-group-text">mm Hg</span>
+    <!-- Section 2: Health Measurements -->
+    <div class="form-section" data-aos="fade-up" data-aos-delay="50">
+      <div class="form-section-header">
+        <div class="form-section-num">2</div>
+        <div class="form-section-title">Health Measurements</div>
+      </div>
+      <div class="form-section-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label" for="trestbps">Resting Blood Pressure</label>
+            <div class="input-group">
+              <input type="number" class="form-control" id="trestbps" name="trestbps"
+                     min="80" max="250" placeholder="e.g. 130" />
+              <span class="input-group-text">mm Hg</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="chol">Serum Cholesterol</label>
+            <div class="input-group">
+              <input type="number" class="form-control" id="chol" name="chol"
+                     min="0" max="700" placeholder="e.g. 220" />
+              <span class="input-group-text">mg/dl</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="fbs">Fasting Blood Sugar &gt;120 mg/dl <span class="text-danger">*</span></label>
+            <select class="form-select" id="fbs" name="fbs" required>
+              <option value="" disabled selected>Choose…</option>
+              {% for opt in meta.categories.fbs %}
+                <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+            <div class="form-text">Indicates diabetes</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="thalch">Max Heart Rate (Exercise)</label>
+            <div class="input-group">
+              <input type="number" class="form-control" id="thalch" name="thalch"
+                     min="60" max="220" placeholder="e.g. 150" />
+              <span class="input-group-text">bpm</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="oldpeak">ST Depression (Exercise)</label>
+            <input type="number" step="0.1" class="form-control" id="oldpeak"
+                   name="oldpeak" min="-5" max="7" placeholder="e.g. 1.0" />
+            <div class="form-text">ECG response to exercise</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="ca">Major Vessels with Narrowing</label>
+            <input type="number" class="form-control" id="ca" name="ca"
+                   min="0" max="3" placeholder="0 – 3" />
+            <div class="form-text">Checked via fluoroscopy</div>
           </div>
         </div>
-
-        <div class="col-md-4">
-          <label class="form-label fw-semibold" for="chol">What's your cholesterol level?</label>
-          <div class="input-group">
-            <input type="number" class="form-control" id="chol" name="chol"
-                   min="0" max="700" placeholder="e.g. 220" />
-            <span class="input-group-text">mg/dl</span>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label fw-semibold" for="fbs">
-            Have you been diagnosed with diabetes? <span class="text-danger">*</span>
-          </label>
-          <select class="form-select" id="fbs" name="fbs" required>
-            <option value="" disabled selected>Choose…</option>
-            {% for opt in meta.categories.fbs %}
-              <option value="{{ opt }}">{{ opt }}</option>
-            {% endfor %}
-          </select>
-          <div class="form-text">Fasting blood sugar &gt; 120 mg/dl</div>
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label fw-semibold" for="thalch">
-            What's your maximum heart rate during exercise?
-          </label>
-          <div class="input-group">
-            <input type="number" class="form-control" id="thalch" name="thalch"
-                   min="60" max="220" placeholder="e.g. 150" />
-            <span class="input-group-text">bpm</span>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label fw-semibold" for="oldpeak">
-            Have you experienced ST depression during exercise?
-          </label>
-          <input type="number" step="0.1" class="form-control" id="oldpeak"
-                 name="oldpeak" min="-5" max="7" placeholder="e.g. 1.0" />
-          <div class="form-text">Heart response to exercise</div>
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label fw-semibold" for="ca">
-            How many major blood vessels show narrowing?
-          </label>
-          <input type="number" class="form-control" id="ca" name="ca"
-                 min="0" max="3" placeholder="0 – 3" />
-          <div class="form-text">Checked via fluoroscopy</div>
-        </div>
-
       </div>
     </div>
 
-    <!-- ── Section 3: Diagnostic ── -->
-    <div class="card mb-4 p-4">
-      <div class="section-header">Heart Function Tests</div>
-      <div class="row g-3">
-
-        <div class="col-md-6">
-          <label class="form-label fw-semibold" for="restecg">
-            What does your resting ECG show? <span class="text-danger">*</span>
-          </label>
-          <select class="form-select" id="restecg" name="restecg" required>
-            <option value="" disabled selected>Choose…</option>
-            {% for opt in meta.categories.restecg %}
-              <option value="{{ opt }}">{{ opt }}</option>
-            {% endfor %}
-          </select>
+    <!-- Section 3: Heart Function Tests -->
+    <div class="form-section" data-aos="fade-up" data-aos-delay="100">
+      <div class="form-section-header">
+        <div class="form-section-num">3</div>
+        <div class="form-section-title">Heart Function Tests</div>
+      </div>
+      <div class="form-section-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label" for="restecg">Resting ECG Result <span class="text-danger">*</span></label>
+            <select class="form-select" id="restecg" name="restecg" required>
+              <option value="" disabled selected>Choose…</option>
+              {% for opt in meta.categories.restecg %}
+                <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="exang">Exercise-Induced Angina <span class="text-danger">*</span></label>
+            <select class="form-select" id="exang" name="exang" required>
+              <option value="" disabled selected>Choose…</option>
+              {% for opt in meta.categories.exang %}
+                <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="slope">ST Segment Slope <span class="text-danger">*</span></label>
+            <select class="form-select" id="slope" name="slope" required>
+              <option value="" disabled selected>Choose…</option>
+              {% for opt in meta.categories.slope %}
+                <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="thal">Thalassemia Type <span class="text-danger">*</span></label>
+            <select class="form-select" id="thal" name="thal" required>
+              <option value="" disabled selected>Choose…</option>
+              {% for opt in meta.categories.thal %}
+                <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
-
-        <div class="col-md-6">
-          <label class="form-label fw-semibold" for="exang">
-            Do you get chest pain during exercise? <span class="text-danger">*</span>
-          </label>
-          <select class="form-select" id="exang" name="exang" required>
-            <option value="" disabled selected>Choose…</option>
-            {% for opt in meta.categories.exang %}
-              <option value="{{ opt }}">{{ opt }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label fw-semibold" for="slope">
-            What's your ST segment slope during exercise? <span class="text-danger">*</span>
-          </label>
-          <select class="form-select" id="slope" name="slope" required>
-            <option value="" disabled selected>Choose…</option>
-            {% for opt in meta.categories.slope %}
-              <option value="{{ opt }}">{{ opt }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label fw-semibold" for="thal">
-            Have you been diagnosed with thalassemia? <span class="text-danger">*</span>
-          </label>
-          <select class="form-select" id="thal" name="thal" required>
-            <option value="" disabled selected>Choose…</option>
-            {% for opt in meta.categories.thal %}
-              <option value="{{ opt }}">{{ opt }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
       </div>
     </div>
 
-    <!-- ── Submit ── -->
-    <div class="d-flex align-items-center gap-3">
+    <!-- Submit -->
+    <div class="d-flex align-items-center gap-3 mt-4" data-aos="fade-up">
       <button type="submit" class="btn btn-primary btn-lg px-5">
-        <i class="bi bi-cpu me-2"></i>Predict
+        <i class="bi bi-cpu-fill me-2"></i>Run Assessment
       </button>
-      <!-- Spinner shown while HTMX waits for the response -->
-      <div id="spinner" class="htmx-indicator">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Calculating…</span>
-        </div>
-        <span class="ms-2 text-muted">Running model…</span>
+      <div id="spinner" class="htmx-indicator align-items-center gap-2">
+        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+        <span class="text-muted" style="font-size:0.875rem;">Analyzing…</span>
       </div>
     </div>
 
   </form>
 
-  <!-- ── Result area – HTMX will inject the result page's content here ── -->
-  <div id="result-box" class="mt-4"></div>
+  <!-- Result injection target -->
+  <div id="result-box" class="mt-5"></div>
 
 </div>
 {% endblock %}

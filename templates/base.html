@@ -3,157 +3,420 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>{% block title %}Heart Disease Predictor {% endblock %}</title>
+  <title>{% block title %}HeartPredict{% endblock %}</title>
 
-  <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"/>
-  <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-        rel="stylesheet"/>
-  <!-- AOS - Animate On Scroll -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
   <style>
     :root {
-      --primary-color: #1a73e8;
-      --primary-dark: #0d47a1;
-      --accent-red: #c62828;
-      --transition-smooth: cubic-bezier(0.34, 1.56, 0.64, 1);
-      --transition-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      --primary:        #2563EB;
+      --primary-dark:   #1D4ED8;
+      --primary-light:  #EFF6FF;
+      --primary-border: #BFDBFE;
+      --danger:         #DC2626;
+      --danger-light:   #FEF2F2;
+      --danger-border:  #FECACA;
+      --success:        #059669;
+      --success-light:  #ECFDF5;
+      --success-border: #A7F3D0;
+      --warning:        #D97706;
+      --warning-light:  #FFFBEB;
+      --warning-border: #FDE68A;
+      --surface:        #FFFFFF;
+      --bg:             #F1F5F9;
+      --border:         #E2E8F0;
+      --text:           #0F172A;
+      --text-secondary: #475569;
+      --text-muted:     #94A3B8;
+      --radius-sm:      0.5rem;
+      --radius:         0.75rem;
+      --radius-lg:      1rem;
+      --shadow-sm:      0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+      --shadow:         0 4px 16px rgba(0,0,0,.08);
+      --shadow-lg:      0 16px 48px rgba(0,0,0,.12);
     }
 
+    *, *::before, *::after { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
 
     body {
-      background: #f8f9fa;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* ── subtle background atmosphere ── */
-    .bg-atmosphere {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
+    /* ── navbar ── */
+    .navbar {
+      background: var(--surface) !important;
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 0;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 1030;
     }
-    .bg-atmosphere .blob {
-      position: absolute;
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--text) !important;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+    }
+    .brand-icon {
+      width: 34px; height: 34px;
+      background: var(--primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .navbar-nav .nav-link {
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: var(--text-secondary) !important;
+      padding: 0.45rem 0.75rem !important;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s;
+    }
+    .navbar-nav .nav-link:hover {
+      color: var(--text) !important;
+      background: var(--bg);
+    }
+    .navbar-nav .nav-link.active {
+      color: var(--primary) !important;
+      background: var(--primary-light);
+      font-weight: 600;
+    }
+    .nav-divider {
+      width: 1px; height: 20px;
+      background: var(--border);
+      margin: 0 0.25rem;
+      align-self: center;
+    }
+    .user-avatar {
+      width: 32px; height: 32px;
+      background: var(--primary);
       border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.06;
-      animation: blobDrift 20s ease-in-out infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
     }
-    .bg-atmosphere .blob:nth-child(1) {
-      width: 500px; height: 500px;
-      background: var(--primary-color);
-      top: -10%; left: -5%;
+    .btn-nav-login {
+      border: 1.5px solid var(--border);
+      color: var(--text) !important;
+      border-radius: var(--radius-sm);
+      padding: 0.38rem 0.9rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: transparent;
+      transition: all 0.15s;
     }
-    .bg-atmosphere .blob:nth-child(2) {
-      width: 400px; height: 400px;
-      background: var(--accent-red);
-      bottom: -5%; right: -5%;
-      animation-delay: -7s;
-      opacity: 0.04;
+    .btn-nav-login:hover { border-color: var(--primary); color: var(--primary) !important; }
+    .btn-nav-register {
+      background: var(--primary);
+      color: #fff !important;
+      border-radius: var(--radius-sm);
+      padding: 0.38rem 0.9rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border: none;
+      transition: all 0.15s;
     }
-    .bg-atmosphere .blob:nth-child(3) {
-      width: 300px; height: 300px;
+    .btn-nav-register:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+    /* ── cards ── */
+    .card {
+      border: 1px solid var(--border) !important;
+      border-radius: var(--radius-lg) !important;
+      box-shadow: var(--shadow-sm);
+      background: var(--surface);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .card:hover {
+      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+    }
+    .card-header {
+      background: transparent !important;
+      border-bottom: 1px solid var(--border) !important;
+      padding: 1rem 1.25rem !important;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    /* ── risk badges (used across all pages) ── */
+    .risk-Low    { background: var(--success-light); color: var(--success); border: 1px solid var(--success-border); }
+    .risk-Medium { background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning-border); }
+    .risk-High   { background: var(--danger-light);  color: var(--danger);  border: 1px solid var(--danger-border);  }
+
+    /* ── buttons ── */
+    .btn {
+      font-weight: 600;
+      font-size: 0.875rem;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s;
+    }
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
       background: var(--primary-dark);
-      top: 40%; left: 55%;
-      animation-delay: -14s;
+      border-color: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(37,99,235,.35);
     }
-    @keyframes blobDrift {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(30px, -30px) scale(1.08); }
-      66% { transform: translate(-20px, 20px) scale(0.95); }
+    .btn-outline-primary {
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    .btn-outline-primary:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+    .btn:active { transform: scale(0.97) !important; }
+
+    /* ── form controls ── */
+    .form-control, .form-select {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      padding: 0.55rem 0.85rem;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      background: var(--surface);
+      color: var(--text);
+      font-family: inherit;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+      background: var(--surface);
+    }
+    .form-label {
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+    .form-text {
+      font-size: 0.77rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+    .input-group-text {
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+    .input-group .form-control { border-left: none; }
+    .input-group .input-group-text:first-child { border-right: none; }
+    .input-group .input-group-text:last-child { border-left: none; }
+
+    /* ── section divider ── */
+    .section-header {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── tables ── */
+    .table {
+      font-size: 0.875rem;
+      color: var(--text);
+      margin-bottom: 0;
+    }
+    .table thead th {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border) !important;
+      padding: 0.85rem 1rem;
+      white-space: nowrap;
+    }
+    .table tbody td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .table tbody tr:last-child td { border-bottom: none; }
+    .table-hover tbody tr:hover td { background: var(--primary-light); }
+
+    /* ── badges ── */
+    .badge {
+      font-weight: 600;
+      font-size: 0.72rem;
+      letter-spacing: 0.3px;
+      padding: 0.3em 0.75em;
+      border-radius: 999px;
+    }
+
+    /* ── progress ── */
+    .progress {
+      background: var(--border);
+      border-radius: 999px;
+    }
+    .progress-bar {
+      border-radius: 999px;
+      transition: width 1.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* ── alerts ── */
+    .alert {
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+    }
+    .alert-warning {
+      background: var(--warning-light);
+      border-color: var(--warning-border);
+      color: #92400E;
+    }
+    .alert-success {
+      background: var(--success-light);
+      border-color: var(--success-border);
+      color: #065F46;
+    }
+    .alert-danger {
+      background: var(--danger-light);
+      border-color: var(--danger-border);
+      color: #991B1B;
+    }
+    .alert-info {
+      background: var(--primary-light);
+      border-color: var(--primary-border);
+      color: #1E40AF;
+    }
+
+    /* ── page header strip ── */
+    .page-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 0 1.75rem;
+    }
+    .page-header h1 {
+      font-size: 1.65rem;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      margin-bottom: 0.3rem;
+    }
+    .page-header p {
+      color: var(--text-secondary);
+      margin-bottom: 0;
+      font-size: 0.9rem;
+    }
+
+    /* ── stat card ── */
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-icon {
+      width: 46px; height: 46px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .stat-value {
+      font-size: 1.65rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-top: 0.2rem;
     }
 
     /* ── hero ── */
     .hero {
-      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+      background: linear-gradient(135deg, #1E40AF 0%, #2563EB 50%, #3B82F6 100%);
       color: #fff;
-      padding: 5rem 0 4rem;
-      border-radius: 0 0 2rem 2rem;
+      padding: 4rem 0 3.5rem;
       position: relative;
       overflow: hidden;
     }
-    .hero h1 { font-size: 2.6rem; font-weight: 800; }
-
-    /* floating heart icon in hero */
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+    }
     .hero-float-icon {
       position: absolute;
-      font-size: 12rem;
-      opacity: 0.07;
+      font-size: 14rem;
+      opacity: 0.05;
       right: -2rem;
       bottom: -2rem;
-      animation: heroHeartFloat 8s ease-in-out infinite;
+      animation: heroFloat 8s ease-in-out infinite;
       pointer-events: none;
     }
-    @keyframes heroHeartFloat {
+    @keyframes heroFloat {
       0%, 100% { transform: translateY(0) rotate(-5deg); }
-      50% { transform: translateY(-20px) rotate(5deg); }
+      50%       { transform: translateY(-20px) rotate(5deg); }
     }
-
-    /* ── cards ── */
-    .card {
-      border: none;
-      border-radius: 1rem;
-      box-shadow: 0 2px 12px rgba(0,0,0,.06);
-      transition: transform 0.35s var(--transition-smooth),
-                  box-shadow 0.35s var(--transition-smooth);
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(0,0,0,.1);
-    }
-    .card .card-img-top { transition: transform 0.5s var(--transition-smooth); }
-    .card:hover .card-img-top { transform: scale(1.03); }
-
-    /* ── risk badges ── */
-    .risk-Low    { background: #d4edda; color: #155724; }
-    .risk-Medium { background: #fff3cd; color: #856404; }
-    .risk-High   { background: #f8d7da; color: #721c24; }
-
-    /* ── probability gauge ── */
-    .gauge-bar { height: 1.2rem; border-radius: .6rem; }
-
-    /* ── progress bar animation ── */
-    .progress .progress-bar {
-      transition: width 1.2s var(--transition-spring);
-    }
-
-    /* ── btn hover smooth ── */
-    .btn {
-      transition: all 0.3s var(--transition-smooth);
-    }
-    .btn:hover { transform: translateY(-2px); }
-    .btn:active { transform: scale(0.97); }
-
-    /* ── section fade-up base ── */
-    [data-aos] { pointer-events: none; }
-    [data-aos].aos-animate { pointer-events: auto; }
 
     /* ── footer ── */
     footer {
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-      color: rgba(255,255,255,0.8);
-      font-size: .85rem;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.8rem;
     }
-    footer a { color: rgba(255,255,255,0.9); }
-    footer a:hover { color: #fff; }
 
-    /* ── form section headers ── */
-    .section-header {
-      font-size: .75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #6c757d;
-      border-bottom: 1px solid #dee2e6;
-      padding-bottom: .4rem;
-      margin-bottom: 1rem;
+    /* ── dropdown ── */
+    .dropdown-menu {
+      border: 1px solid var(--border) !important;
+      border-radius: var(--radius) !important;
+      box-shadow: var(--shadow-lg) !important;
+      padding: 0.4rem 0;
+      font-size: 0.875rem;
     }
+    .dropdown-item {
+      padding: 0.5rem 0.9rem;
+      color: var(--text);
+      transition: background 0.12s;
+    }
+    .dropdown-item:hover { background: var(--bg); }
+    .dropdown-divider { border-color: var(--border); margin: 0.3rem 0; }
 
     /* ── floating chat widget ── */
     .chat-fab {
@@ -163,47 +426,51 @@
       z-index: 1055;
     }
     .chat-fab .fab-btn {
-      width: 56px; height: 56px;
+      width: 52px; height: 52px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #E53935, #B71C1C);
+      background: var(--primary);
       border: none;
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       cursor: pointer;
-      box-shadow: 0 4px 20px rgba(229,57,53,0.4);
-      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease;
+      box-shadow: 0 4px 20px rgba(37,99,235,.45);
+      transition: all 0.2s;
       position: relative;
     }
-    .chat-fab .fab-btn:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(229,57,53,0.5); }
-    .chat-fab .fab-btn:active { transform: scale(0.92); }
+    .chat-fab .fab-btn:hover {
+      background: var(--primary-dark);
+      transform: scale(1.08);
+      box-shadow: 0 6px 28px rgba(37,99,235,.55);
+    }
     .chat-fab .fab-btn .pulse-ring {
       position: absolute;
       inset: -4px;
       border-radius: 50%;
-      border: 2px solid rgba(229,57,53,0.3);
+      border: 2px solid rgba(37,99,235,.35);
       animation: fabPulse 2s ease-out infinite;
     }
     @keyframes fabPulse {
-      0% { transform: scale(1); opacity: 1; }
-      100% { transform: scale(1.5); opacity: 0; }
+      0%   { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.6); opacity: 0; }
     }
     .chat-fab .fab-tooltip {
       position: absolute;
-      right: 66px;
+      right: 62px;
       top: 50%;
       transform: translateY(-50%);
-      background: #333;
+      background: var(--text);
       color: #fff;
-      font-size: 0.75rem;
-      padding: 0.35rem 0.75rem;
-      border-radius: 0.4rem;
+      font-size: 0.72rem;
+      font-weight: 500;
+      padding: 0.35rem 0.7rem;
+      border-radius: var(--radius-sm);
       white-space: nowrap;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s;
+      transition: opacity 0.15s;
     }
     .chat-fab .fab-tooltip::after {
       content: '';
@@ -212,51 +479,31 @@
       top: 50%;
       transform: translateY(-50%);
       border: 5px solid transparent;
-      border-left-color: #333;
+      border-left-color: var(--text);
     }
-    .chat-fab .fab-btn:hover + .fab-tooltip,
     .chat-fab:hover .fab-tooltip { opacity: 1; }
-    .chat-fab .fab-badge {
-      position: absolute;
-      top: -2px;
-      right: -2px;
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      background: #fff;
-      color: #E53935;
-      font-size: 0.6rem;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-
     .chat-popup {
       position: fixed;
-      bottom: 5rem;
+      bottom: 4.5rem;
       right: 1.5rem;
       z-index: 1055;
       width: 360px;
       max-height: 520px;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: 1rem;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
-      border: 1px solid rgba(255,255,255,0.5);
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
       display: none;
       flex-direction: column;
       overflow: hidden;
-      animation: popupIn 0.3s ease-out;
+      animation: popupIn 0.25s ease-out;
     }
     .chat-popup.show { display: flex; }
     @keyframes popupIn {
-      0% { opacity: 0; transform: translateY(16px) scale(0.95); }
+      0%   { opacity: 0; transform: translateY(12px) scale(0.96); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
     .chat-popup .popup-header {
-      background: linear-gradient(135deg, #E53935, #B71C1C);
+      background: var(--primary);
       color: #fff;
       padding: 0.85rem 1rem;
       display: flex;
@@ -265,25 +512,19 @@
       flex-shrink: 0;
     }
     .chat-popup .popup-header .popup-avatar {
-      width: 32px; height: 32px;
+      width: 30px; height: 30px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
     }
-    .chat-popup .popup-header .popup-avatar i { font-size: 1rem; color: #fff; }
     .chat-popup .popup-header .popup-info h6 { margin: 0; font-size: 0.85rem; font-weight: 700; }
-    .chat-popup .popup-header .popup-info small { font-size: 0.65rem; opacity: 0.85; }
+    .chat-popup .popup-header .popup-info small { font-size: 0.65rem; opacity: 0.8; }
     .chat-popup .popup-close {
       margin-left: auto;
-      background: none;
-      border: none;
-      color: rgba(255,255,255,0.7);
-      font-size: 1.2rem;
-      cursor: pointer;
-      padding: 0;
-      line-height: 1;
+      background: none; border: none;
+      color: rgba(255,255,255,.7);
+      font-size: 1.1rem; cursor: pointer; padding: 0; line-height: 1;
     }
     .chat-popup .popup-close:hover { color: #fff; }
     .chat-popup .popup-messages {
@@ -292,239 +533,160 @@
       padding: 1rem;
       display: flex;
       flex-direction: column;
-      gap: 0.7rem;
-      background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+      gap: 0.6rem;
+      background: var(--bg);
       min-height: 200px;
     }
     .chat-popup .popup-messages::-webkit-scrollbar { width: 4px; }
-    .chat-popup .popup-messages::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+    .chat-popup .popup-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
     .chat-popup .popup-messages .msg {
       max-width: 88%;
-      padding: 0.6rem 0.9rem;
-      border-radius: 14px;
-      font-size: 0.85rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: var(--radius);
+      font-size: 0.84rem;
       line-height: 1.5;
       word-wrap: break-word;
-      animation: msgSlide 0.25s ease-out;
     }
     .chat-popup .popup-messages .msg.user {
       align-self: flex-end;
-      background: linear-gradient(135deg, #E53935, #D32F2F);
+      background: var(--primary);
       color: #fff;
       border-bottom-right-radius: 4px;
     }
     .chat-popup .popup-messages .msg.bot {
       align-self: flex-start;
-      background: #fff;
-      color: #1a1a2e;
+      background: var(--surface);
+      color: var(--text);
       border-bottom-left-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
     }
     .chat-popup .popup-input-area {
       display: flex;
       gap: 0.5rem;
       padding: 0.75rem 1rem;
-      border-top: 1px solid rgba(0,0,0,0.05);
-      background: #fff;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
       flex-shrink: 0;
     }
     .chat-popup .popup-input-area input {
       flex: 1;
-      border: 1.5px solid #eee;
-      border-radius: 24px;
-      padding: 0.5rem 1rem;
-      font-size: 0.82rem;
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      padding: 0.45rem 1rem;
+      font-size: 0.83rem;
       outline: none;
       font-family: inherit;
-      background: #f9f9f9;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
     .chat-popup .popup-input-area input:focus {
-      border-color: #E53935;
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(229,57,53,0.08);
+      border-color: var(--primary);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
     }
     .chat-popup .popup-input-area button {
-      width: 36px; height: 36px;
-      border: none;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #E53935, #D32F2F);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: transform 0.2s;
+      width: 34px; height: 34px;
+      border: none; border-radius: 50%;
+      background: var(--primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+      transition: all 0.15s;
     }
-    .chat-popup .popup-input-area button:hover { transform: scale(1.1); }
-    .chat-popup .popup-input-area button:active { transform: scale(0.92); }
+    .chat-popup .popup-input-area button:hover { background: var(--primary-dark); transform: scale(1.08); }
     .chat-popup .popup-input-area button svg { width: 14px; height: 14px; fill: #fff; }
     .chat-popup .popup-disclaimer {
-      padding: 0.4rem 1rem;
+      padding: 0.35rem 1rem;
       font-size: 0.55rem;
-      color: #aaa;
+      color: var(--text-muted);
       text-align: center;
-      background: #fcfcfc;
-      border-top: 1px solid rgba(0,0,0,0.03);
+      background: var(--bg);
+      border-top: 1px solid var(--border);
       flex-shrink: 0;
     }
-    .chat-popup .popup-disclaimer strong { color: #c62828; }
+    .chat-popup .popup-disclaimer strong { color: var(--danger); }
 
     @media (max-width: 480px) {
-      .chat-popup {
-        width: calc(100vw - 2rem);
-        right: 1rem;
-        bottom: 4.5rem;
-        max-height: 65vh;
-      }
+      .chat-popup { width: calc(100vw - 2rem); right: 1rem; bottom: 4rem; }
     }
+
+    [data-aos] { pointer-events: none; }
+    [data-aos].aos-animate { pointer-events: auto; }
   </style>
 
   {% block extra_head %}{% endblock %}
 </head>
 <body>
 
-<!-- ── background atmosphere ── -->
-<div class="bg-atmosphere">
-  <div class="blob"></div>
-  <div class="blob"></div>
-  <div class="blob"></div>
-</div>
-
 <!-- ── navbar ── -->
-<style>
-  .navbar {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-    padding: 0.6rem 0;
-    transition: padding 0.3s var(--transition-smooth), box-shadow 0.3s var(--transition-smooth);
-  }
-  .navbar.navbar-shrink {
-    padding: 0.3rem 0;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  }
-  .navbar-brand { font-weight: 700; letter-spacing: 0.5px; transition: font-size 0.3s var(--transition-smooth); }
-  .navbar-shrink .navbar-brand { font-size: 1.2rem; }
-  .navbar-nav .nav-link {
-    font-weight: 500;
-    color: rgba(255,255,255,0.8);
-    padding: 0.5rem 0.85rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s;
-    font-size: 0.9rem;
-  }
-  .navbar-nav .nav-link:hover,
-  .navbar-nav .nav-link.active {
-    background: rgba(255,255,255,0.15);
-    color: #fff;
-  }
-  .nav-divider {
-    width: 1px;
-    height: 24px;
-    background: rgba(255,255,255,0.25);
-    margin: 0 0.3rem;
-    align-self: center;
-  }
-  .btn-nav-login {
-    background: rgba(255,255,255,0.15);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.3);
-    border-radius: 0.5rem;
-    padding: 0.35rem 1rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-  .btn-nav-login:hover {
-    background: rgba(255,255,255,0.25);
-    color: #fff;
-  }
-  .user-avatar {
-    width: 32px;
-    height: 32px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #fff;
-  }
-</style>
-
-<nav class="navbar navbar-expand-lg navbar-dark">
+<nav class="navbar navbar-expand-lg">
   <div class="container">
-    <a href="{{ url_for('index') }}" class="navbar-brand d-flex align-items-center gap-2">
-      <i class="bi bi-heart-pulse-fill"></i>
-      <span>HeartPredict</span>
+    <a href="{{ url_for('index') }}" class="navbar-brand">
+      <div class="brand-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+      HeartPredict
     </a>
-    <button class="navbar-toggler" type="button"
+    <button class="navbar-toggler border-0 shadow-none" type="button"
             data-bs-toggle="collapse" data-bs-target="#navMenu">
-      <span class="navbar-toggler-icon"></span>
+      <i class="bi bi-list fs-4" style="color: var(--text-secondary);"></i>
     </button>
     <div class="collapse navbar-collapse" id="navMenu">
-      <ul class="navbar-nav me-auto">
+      <ul class="navbar-nav me-auto gap-1 ms-3">
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"
-             href="{{ url_for('index') }}">
-            Home
-          </a>
+             href="{{ url_for('index') }}">Home</a>
         </li>
         {% if current_user.is_authenticated %}
-        <li class="nav-divider d-none d-lg-block"></li>
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'predict' %}active{% endif %}"
-             href="{{ url_for('predict') }}">
-            Assessment
-          </a>
+             href="{{ url_for('predict') }}">Assessment</a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'history' %}active{% endif %}"
-             href="{{ url_for('history') }}">
-            History
-          </a>
+             href="{{ url_for('history') }}">History</a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'about' %}active{% endif %}"
-             href="{{ url_for('about') }}">
-            About
-          </a>
+             href="{{ url_for('about') }}">About</a>
         </li>
         {% endif %}
       </ul>
 
       {% if current_user.is_authenticated %}
       <div class="d-flex align-items-center gap-2">
+        <div class="nav-divider d-none d-lg-block"></div>
         <a href="{{ url_for('dashboard.redirect_dashboard') }}"
-           class="nav-link d-none d-lg-block">
-          Dashboard
+           class="nav-link d-none d-lg-flex align-items-center gap-1">
+          <i class="bi bi-grid-1x2 me-1"></i>Dashboard
         </a>
         <div class="dropdown">
-          <button class="btn btn-link text-white text-decoration-none d-flex align-items-center gap-2 p-1"
-                  data-bs-toggle="dropdown" aria-expanded="false">
-            <div class="user-avatar">
-              {{ current_user.username[0] | upper }}
-            </div>
-            <span class="d-none d-sm-inline small">{{ current_user.username }}</span>
-            <i class="bi bi-chevron-down" style="font-size:0.65rem"></i>
+          <button class="btn btn-link text-decoration-none d-flex align-items-center gap-2 p-1 shadow-none"
+                  data-bs-toggle="dropdown" aria-expanded="false"
+                  style="color: var(--text);">
+            <div class="user-avatar">{{ current_user.username[0] | upper }}</div>
+            <span class="d-none d-sm-inline" style="font-size:0.875rem;font-weight:500;">{{ current_user.username }}</span>
+            <i class="bi bi-chevron-down" style="font-size:0.6rem;color:var(--text-muted);"></i>
           </button>
-          <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-            <li><span class="dropdown-item-text">
-              <small class="text-muted">Signed in as <strong>{{ current_user.username }}</strong></small><br>
-              <small class="text-muted">Role: {{ current_user.role }}</small>
-            </span></li>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li class="px-3 py-2">
+              <div style="font-size:0.82rem;font-weight:600;">{{ current_user.username }}</div>
+              <div style="font-size:0.73rem;color:var(--text-muted);">{{ current_user.role | capitalize }}</div>
+            </li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
-              <i class="bi bi-box-arrow-right me-2"></i>Logout
-            </a></li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2"
+                 href="{{ url_for('auth.logout') }}"
+                 style="color:var(--danger);">
+                <i class="bi bi-box-arrow-right"></i>Sign out
+              </a>
+            </li>
           </ul>
         </div>
       </div>
       {% else %}
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-2 align-items-center ms-lg-3">
         <a href="{{ url_for('auth.login') }}" class="btn btn-nav-login">Login</a>
-        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-sm px-3" style="border-radius:0.5rem;font-weight:500">Register</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-nav-register">Register</a>
       </div>
       {% endif %}
     </div>
@@ -536,9 +698,10 @@
   {% if messages %}
     <div class="container mt-3">
       {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="alert alert-{{ category }} alert-dismissible fade show d-flex align-items-start gap-2" role="alert">
+          <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category == 'danger' %}x-circle-fill{% elif category == 'warning' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %} flex-shrink-0 mt-1"></i>
+          <div>{{ message }}</div>
+          <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
         </div>
       {% endfor %}
     </div>
@@ -551,11 +714,16 @@
 </main>
 
 <!-- ── footer ── -->
-<footer class="py-3 text-center">
+<footer class="py-4 text-center">
   <div class="container">
     <p class="mb-0">
-      HeartPredict &bull; UCI Heart Disease Dataset &bull; Gradient Boosting Classifier
-      &bull; <span class="text-warning fw-semibold">Not a medical tool</span>
+      <span style="color:var(--primary);font-weight:700;">HeartPredict</span>
+      <span class="mx-2" style="color:var(--border);">|</span>
+      UCI Heart Disease Dataset
+      <span class="mx-2" style="color:var(--border);">|</span>
+      Gradient Boosting Classifier
+      <span class="mx-2" style="color:var(--border);">|</span>
+      <span style="color:var(--warning);font-weight:600;">Educational use only &mdash; not a medical tool</span>
     </p>
   </div>
 </footer>
@@ -564,10 +732,10 @@
 <!-- ── floating chat widget ── -->
 <div class="chat-fab" id="chatFab">
   <button class="fab-btn" id="chatFabBtn" aria-label="Open Heart Health Assistant">
-    <i class="bi bi-heart-pulse-fill"></i>
+    <i class="bi bi-chat-heart-fill"></i>
     <span class="pulse-ring"></span>
   </button>
-  <span class="fab-tooltip">Ask the Heart Assistant</span>
+  <span class="fab-tooltip">Heart Health Assistant</span>
 </div>
 
 <div class="chat-popup" id="chatPopup">
@@ -575,7 +743,7 @@
     <div class="popup-avatar"><i class="bi bi-heart-pulse-fill"></i></div>
     <div class="popup-info">
       <h6>Heart Health Assistant</h6>
-      <small>AI-powered &middot; Educational guidance</small>
+      <small>Educational guidance &middot; Not medical advice</small>
     </div>
     <button class="popup-close" id="chatPopupClose">&times;</button>
   </div>
@@ -583,7 +751,7 @@
     <div class="msg bot">Hi! I'm your Heart Health Assistant. Ask me anything about heart disease, risk factors, or your results.</div>
   </div>
   <div class="popup-input-area">
-    <input type="text" id="popupInput" placeholder="Ask the assistant..." autocomplete="off">
+    <input type="text" id="popupInput" placeholder="Ask a question..." autocomplete="off">
     <button id="popupSend">
       <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
     </button>
@@ -594,80 +762,61 @@
 <script>
 (function() {
   const fabBtn = document.getElementById('chatFabBtn');
-  const popup = document.getElementById('chatPopup');
+  const popup  = document.getElementById('chatPopup');
   const closeBtn = document.getElementById('chatPopupClose');
-  const popupInput = document.getElementById('popupInput');
-  const popupSend = document.getElementById('popupSend');
-  const popupMessages = document.getElementById('popupMessages');
+  const input  = document.getElementById('popupInput');
+  const send   = document.getElementById('popupSend');
+  const msgs   = document.getElementById('popupMessages');
   let ready = true;
 
   function togglePopup() {
-    const isOpen = popup.classList.toggle('show');
-    if (isOpen) { popupInput.focus(); }
+    const open = popup.classList.toggle('show');
+    if (open) input.focus();
   }
-
   fabBtn.addEventListener('click', togglePopup);
   closeBtn.addEventListener('click', togglePopup);
 
   function addMsg(text, role) {
-    const div = document.createElement('div');
-    div.className = 'msg ' + role;
-    div.textContent = text;
-    popupMessages.appendChild(div);
-    popupMessages.scrollTop = popupMessages.scrollHeight;
+    const d = document.createElement('div');
+    d.className = 'msg ' + role;
+    d.textContent = text;
+    msgs.appendChild(d);
+    msgs.scrollTop = msgs.scrollHeight;
   }
 
   async function sendMsg(msg) {
     if (!msg.trim() || !ready) return;
     addMsg(msg, 'user');
-    popupInput.value = '';
-    popupSend.disabled = true;
+    input.value = '';
+    send.disabled = true;
     ready = false;
     try {
-      const resp = await fetch('/assistant/chat', {
+      const r = await fetch('/assistant/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: msg, context: { page: 'floating_widget' } })
       });
-      const data = await resp.json();
+      const data = await r.json();
       addMsg(data.response || 'Sorry, something went wrong.', 'bot');
     } catch {
       addMsg('Unable to reach the assistant. Please try again.', 'bot');
     } finally {
-      popupSend.disabled = false;
+      send.disabled = false;
       ready = true;
-      popupInput.focus();
+      input.focus();
     }
   }
 
-  popupSend.addEventListener('click', function() { sendMsg(popupInput.value); });
-  popupInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') sendMsg(popupInput.value);
-  });
+  send.addEventListener('click', () => sendMsg(input.value));
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMsg(input.value); });
 })();
 </script>
 {% endif %}
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- AOS - Animate On Scroll -->
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-  AOS.init({
-    duration: 800,
-    easing: 'ease-out-cubic',
-    once: true,
-    offset: 60,
-    disable: 'mobile'
-  });
-
-  // Navbar shrink on scroll
-  let nav = document.querySelector('.navbar');
-  if (nav) {
-    window.addEventListener('scroll', function () {
-      nav.classList.toggle('navbar-shrink', window.scrollY > 60);
-    });
-  }
+  AOS.init({ duration: 650, easing: 'ease-out-cubic', once: true, offset: 50, disable: 'mobile' });
 </script>
 {% block extra_js %}{% endblock %}
 </body>

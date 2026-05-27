@@ -1,48 +1,151 @@
-<!-- Risk banner -->
-<div class="card border-0 text-center p-4 result-card
-  {% if result.risk_level == 'Low' %}bg-success bg-opacity-10 border border-success{% endif %}
-  {% if result.risk_level == 'Medium' %}bg-warning bg-opacity-10 border border-warning{% endif %}
-  {% if result.risk_level == 'High' %}bg-danger bg-opacity-10 border border-danger{% endif %}
-">
-  <div class="display-5 mb-2 result-icon">
-    {% if result.risk_level == 'Low' %}
-      <i class="bi bi-shield-check text-success"></i>
-    {% elif result.risk_level == 'Medium' %}
-      <i class="bi bi-exclamation-triangle text-warning"></i>
-    {% else %}
-      <i class="bi bi-x-octagon text-danger"></i>
-    {% endif %}
-  </div>
+<style>
+.result-risk-card {
+  border-left: 4px solid transparent !important;
+  overflow: hidden;
+}
+.result-risk-card.risk-low    { border-left-color: var(--success) !important; }
+.result-risk-card.risk-medium { border-left-color: var(--warning) !important; }
+.result-risk-card.risk-high   { border-left-color: var(--danger)  !important; }
 
-  <h3 class="fw-bold mb-1">
-    {% if result.prediction == 1 %}
-      Heart Disease Detected
-    {% else %}
-      No Heart Disease Detected
-    {% endif %}
-  </h3>
+.risk-icon-wrap {
+  width: 52px; height: 52px;
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+.risk-icon-low    { background: var(--success-light); color: var(--success); }
+.risk-icon-medium { background: var(--warning-light); color: var(--warning); }
+.risk-icon-high   { background: var(--danger-light);  color: var(--danger);  }
 
-  <p class="mb-3 text-muted">
-    Risk Level:
-    <span class="badge fs-6 risk-{{ result.risk_level }}">{{ result.risk_level }} Risk</span>
-  </p>
+.risk-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  letter-spacing: 0.2px;
+}
+.risk-pill-low    { background: var(--success-light); color: var(--success); border: 1px solid var(--success-border); }
+.risk-pill-medium { background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning-border); }
+.risk-pill-high   { background: var(--danger-light);  color: var(--danger);  border: 1px solid var(--danger-border);  }
 
-  <div class="mx-auto" style="max-width:420px">
-    <div class="d-flex justify-content-between mb-1 small text-muted">
-      <span>0%</span>
-      <span class="fw-bold text-dark">{{ result.probability }}% risk</span>
-      <span>100%</span>
-    </div>
-    <div class="progress" style="height:1rem; border-radius:.5rem;">
-      <div class="progress-bar progress-bar-animated
-        {% if result.risk_level == 'Low' %}bg-success
-        {% elif result.risk_level == 'Medium' %}bg-warning
-        {% else %}bg-danger{% endif %}"
-        role="progressbar"
-        style="width: 0%"
-        data-width="{{ result.probability }}"
-        aria-valuenow="{{ result.probability }}" aria-valuemin="0" aria-valuemax="100">
+.gauge-svg circle.track {
+  transition: none;
+}
+.gauge-svg circle.fill {
+  transition: stroke-dasharray 1.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+</style>
+
+{% set risk_lower = result.risk_level | lower %}
+{% set circ = 251.2 %}
+{% set filled = (result.probability / 100 * circ) | round(2) %}
+
+<div class="card result-risk-card risk-{{ risk_lower }} mb-4">
+  <div class="card-body p-4">
+
+    <!-- Header row -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <div class="risk-icon-wrap risk-icon-{{ risk_lower }}">
+        {% if risk_lower == 'low' %}
+          <i class="bi bi-shield-check-fill"></i>
+        {% elif risk_lower == 'medium' %}
+          <i class="bi bi-exclamation-triangle-fill"></i>
+        {% else %}
+          <i class="bi bi-exclamation-octagon-fill"></i>
+        {% endif %}
+      </div>
+      <div>
+        <div class="text-uppercase fw-bold mb-1"
+             style="font-size:0.65rem;letter-spacing:1.2px;color:var(--text-muted);">
+          Assessment Result
+        </div>
+        <h4 class="fw-bold mb-0" style="letter-spacing:-0.3px;">
+          {% if result.prediction == 1 %}Heart Disease Detected{% else %}No Heart Disease Detected{% endif %}
+        </h4>
       </div>
     </div>
+
+    <!-- Gauge + description -->
+    <div class="d-flex align-items-center gap-4 flex-wrap">
+
+      <!-- Circular SVG gauge -->
+      <div style="flex-shrink:0;">
+        <svg class="gauge-svg" viewBox="0 0 120 120" width="120" height="120">
+          <!-- Background track (270° arc starting from 135°) -->
+          <circle class="track"
+            cx="60" cy="60" r="46"
+            fill="none"
+            stroke="var(--border)"
+            stroke-width="10"
+            stroke-dasharray="{{ (circ * 0.75) | round(1) }} {{ circ }}"
+            stroke-linecap="round"
+            transform="rotate(135 60 60)"
+          />
+          <!-- Filled arc -->
+          <circle class="fill"
+            cx="60" cy="60" r="46"
+            fill="none"
+            stroke="{% if risk_lower == 'low' %}var(--success){% elif risk_lower == 'medium' %}var(--warning){% else %}var(--danger){% endif %}"
+            stroke-width="10"
+            stroke-dasharray="0 {{ circ }}"
+            stroke-linecap="round"
+            transform="rotate(135 60 60)"
+            data-target="{{ (filled * 0.75) | round(2) }}"
+          />
+          <!-- Center percentage -->
+          <text x="60" y="56"
+            text-anchor="middle"
+            font-size="21"
+            font-weight="800"
+            font-family="Inter, sans-serif"
+            fill="{% if risk_lower == 'low' %}var(--success){% elif risk_lower == 'medium' %}var(--warning){% else %}var(--danger){% endif %}">
+            {{ result.probability }}%
+          </text>
+          <text x="60" y="70"
+            text-anchor="middle"
+            font-size="9"
+            font-weight="700"
+            font-family="Inter, sans-serif"
+            fill="var(--text-muted)"
+            letter-spacing="1">
+            RISK
+          </text>
+        </svg>
+      </div>
+
+      <!-- Risk level + description -->
+      <div class="flex-grow-1">
+        <div class="risk-pill risk-pill-{{ risk_lower }} mb-3">
+          <i class="bi bi-{% if risk_lower == 'low' %}check-circle-fill{% elif risk_lower == 'medium' %}dash-circle-fill{% else %}x-circle-fill{% endif %}"></i>
+          {{ result.risk_level }} Risk
+        </div>
+        <p class="text-muted mb-0" style="font-size:0.875rem;line-height:1.6;">
+          {% if risk_lower == 'low' %}
+            Your clinical indicators suggest a lower likelihood of heart disease. Continue maintaining heart-healthy habits and regular check-ups.
+          {% elif risk_lower == 'medium' %}
+            Some risk factors are present. Consider discussing your results with a healthcare provider and reviewing your lifestyle.
+          {% else %}
+            Significant risk factors detected. Please consult a healthcare professional promptly for a thorough cardiac evaluation.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
   </div>
 </div>
+
+<script>
+(function() {
+  const arc = document.querySelector('.gauge-svg circle.fill');
+  if (!arc) return;
+  const target = parseFloat(arc.dataset.target);
+  const total = {{ circ }};
+  setTimeout(() => {
+    arc.style.strokeDasharray = target + ' ' + total;
+  }, 200);
+})();
+</script>
