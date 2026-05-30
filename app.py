@@ -37,6 +37,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+from dotenv import load_dotenv
 import requests
 
 
@@ -53,6 +54,8 @@ from auth_routes import auth
 from dashboard_routes import dashboard
 from assistant_routes import assistant_bp
 from shap_utils import compute_shap_explanation
+
+load_dotenv()
 
 def get_heart_news():
     try:
@@ -369,6 +372,12 @@ def about():
 def api_predict():
     return predict()
 
+
+# ── template globals ───────────────────────────────────────────────────────
+@app.context_processor
+def inject_now():
+    from datetime import datetime
+    return {"now": datetime.now}
 
 # ── error handlers ─────────────────────────────────────────────────────────
 @app.errorhandler(401)

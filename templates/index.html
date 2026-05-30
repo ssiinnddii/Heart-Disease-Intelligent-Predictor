@@ -97,7 +97,7 @@
     border-spacing: 0;
     border-radius: var(--radius);
     overflow: hidden;
-    border: 1px solid var(--border);
+    border: 2px solid #64748B;
   }
   .risk-table thead th {
     background: var(--bg);
@@ -107,13 +107,13 @@
     letter-spacing: 0.6px;
     color: var(--text-muted);
     padding: 0.85rem 1rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 2px solid #64748B;
   }
   .risk-table tbody td {
     padding: 0.9rem 1rem;
     font-size: 0.875rem;
     vertical-align: middle;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1.5px solid #94A3B8;
   }
   .risk-table tbody tr:last-child td { border-bottom: none; }
   .risk-table tbody tr:hover td { background: var(--bg); }
@@ -162,15 +162,15 @@
 <div class="hero-home">
   <i class="bi bi-heart-pulse-fill hero-float"></i>
   <div class="container">
-    <div class="row align-items-center g-5">
-      <div class="col-lg-7" data-aos="fade-up">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center" data-aos="fade-up">
         <div class="hero-badge">
           <i class="bi bi-cpu-fill"></i> AI-Powered Heart Analysis
         </div>
         <h1 class="fw-bold mb-3" style="font-size:2.5rem;letter-spacing:-0.5px;line-height:1.15;">
           Heart Disease<br>Risk Predictor
         </h1>
-        <p class="mb-4" style="font-size:1rem;opacity:.85;max-width:480px;line-height:1.65;">
+        <p class="mb-4 mx-auto" style="font-size:1rem;opacity:.85;max-width:600px;line-height:1.65;">
           Assess your heart disease risk using 13 clinically validated indicators.
           Powered by Gradient Boosting with SHAP explainability.
         </p>
@@ -179,36 +179,6 @@
            style="color:var(--primary);border-radius:var(--radius);">
           <i class="bi bi-clipboard2-pulse-fill me-2"></i>Start Assessment
         </a>
-      </div>
-
-      <!-- Model stats -->
-      <div class="col-lg-5" data-aos="fade-up" data-aos-delay="150">
-        <div class="row g-3">
-          <div class="col-6">
-            <div class="hero-stat">
-              <div class="val">91.7%</div>
-              <div class="lbl">ROC-AUC Score</div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="hero-stat">
-              <div class="val">87.2%</div>
-              <div class="lbl">F1 Score</div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="hero-stat">
-              <div class="val">13</div>
-              <div class="lbl">Clinical Features</div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="hero-stat">
-              <div class="val">SHAP</div>
-              <div class="lbl">Explainability</div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>

@@ -36,6 +36,7 @@ An AI-powered web application that predicts heart disease risk using clinical he
 | **ML Model** | Scikit-learn (Gradient Boosting Classifier in a Pipeline with StandardScaler) |
 | **Explainability** | SHAP (TreeExplainer) |
 | **Authentication** | Flask-Login with Werkzeug password hashing (PBKDF2-SHA256) |
+| **Chatbot** | Mistral AI API (mistral-medium) |
 | **Frontend** | HTML5, CSS3, Bootstrap 5, Bootstrap Icons |
 | **Charts** | Chart.js 4 |
 | **Dynamic UI** | HTMX (for inline prediction results without page reload) |
@@ -45,6 +46,8 @@ An AI-powered web application that predicts heart disease risk using clinical he
 ```
 Heart-Disease-Intelligent-Predictor/
 ├── app.py                      # Main Flask application, routes, model loading
+├── assistant_engine.py         # Mistral AI-powered chatbot response engine
+├── assistant_routes.py         # Chatbot API blueprint with session history
 ├── auth.py                     # Flask-Login setup, password hashing
 ├── auth_routes.py              # Login, register, logout routes
 ├── dashboard_routes.py         # User/Doctor/Admin dashboards, analytics, notes
@@ -154,7 +157,13 @@ venv\Scripts\activate
 # macOS/Linux:
 source venv/bin/activate
 
-pip install flask flask-sqlalchemy flask-login joblib scikit-learn pandas numpy werkzeug shap requests feedparser
+pip install -r requirements.txt
+```
+
+3. Configure environment variables:
+```bash
+# Copy the example .env file and edit with your settings
+# Make sure MISTRAL_API_KEY is set (already provided in .env)
 ```
 
 3. Run the admin seed script (first time only):

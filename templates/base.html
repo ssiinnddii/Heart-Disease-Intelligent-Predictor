@@ -613,6 +613,66 @@
 
     [data-aos] { pointer-events: none; }
     [data-aos].aos-animate { pointer-events: auto; }
+
+    /* ── footer ── */
+    .footer {
+      background: linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 45%, #2563EB 100%);
+      color: rgba(255,255,255,.85);
+      margin-top: 3rem;
+    }
+    .footer-brand-icon {
+      width: 34px; height: 34px;
+      background: rgba(255,255,255,.2);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 1rem; flex-shrink: 0;
+    }
+    .footer-brand-name {
+      font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: -0.3px;
+    }
+    .footer-desc {
+      font-size: 0.82rem; line-height: 1.6; color: rgba(255,255,255,.65); margin-bottom: 0;
+    }
+    .footer-heading {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: rgba(255,255,255,.9); margin-bottom: 1rem;
+    }
+    .footer-links {
+      list-style: none; padding: 0; margin: 0;
+    }
+    .footer-links li {
+      font-size: 0.82rem; margin-bottom: 0.5rem; color: rgba(255,255,255,.65);
+    }
+    .footer-links a {
+      color: rgba(255,255,255,.65); text-decoration: none; transition: color 0.15s;
+    }
+    .footer-links a:hover {
+      color: #fff;
+    }
+    .footer-disclaimer {
+      display: flex; align-items: flex-start; gap: 0.5rem;
+      padding: 1rem 1.25rem; margin-bottom: 0;
+      background: rgba(255,255,255,.08); border-radius: var(--radius);
+      font-size: 0.75rem; line-height: 1.5; color: rgba(255,255,255,.7);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .footer-disclaimer i {
+      margin-top: 2px; color: #FCD34D;
+    }
+    .footer-disclaimer strong {
+      color: #fff;
+    }
+    .footer-bottom {
+      display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+      gap: 0.5rem; padding: 1.25rem 0; margin-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,.12);
+      font-size: 0.72rem; color: rgba(255,255,255,.5);
+    }
+    .footer-bottom-divider { color: rgba(255,255,255,.15); }
+    @media (max-width: 767.98px) {
+      .footer-bottom { flex-direction: column; gap: 0.25rem; }
+      .footer-bottom-divider { display: none; }
+    }
   </style>
 
   {% block extra_head %}{% endblock %}
@@ -714,17 +774,50 @@
 </main>
 
 <!-- ── footer ── -->
-<footer class="py-4 text-center">
+<footer class="footer pt-5 pb-0">
   <div class="container">
-    <p class="mb-0">
-      <span style="color:var(--primary);font-weight:700;">HeartPredict</span>
-      <span class="mx-2" style="color:var(--border);">|</span>
-      UCI Heart Disease Dataset
-      <span class="mx-2" style="color:var(--border);">|</span>
-      Gradient Boosting Classifier
-      <span class="mx-2" style="color:var(--border);">|</span>
-      <span style="color:var(--warning);font-weight:600;">Educational use only &mdash; not a medical tool</span>
-    </p>
+    <div class="row g-4 pb-4 justify-content-between align-items-start">
+      <!-- Brand -->
+      <div class="col-lg-5 col-md-7">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="footer-brand-icon">
+            <i class="bi bi-heart-pulse-fill"></i>
+          </div>
+          <span class="footer-brand-name">HeartPredict</span>
+        </div>
+        <p class="footer-desc">
+          AI-powered heart disease risk assessment with explainable predictions and educational guidance.
+        </p>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-lg-3 col-md-4">
+        <h6 class="footer-heading">Quick Links</h6>
+        <ul class="footer-links">
+          <li><a href="{{ url_for('index') }}">Home</a></li>
+          {% if current_user.is_authenticated %}
+          <li><a href="{{ url_for('predict') }}">Assessment</a></li>
+          <li><a href="{{ url_for('history') }}">History</a></li>
+          {% endif %}
+          <li><a href="{{ url_for('about') }}">About</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="footer-disclaimer">
+      <i class="bi bi-exclamation-triangle-fill me-2 flex-shrink-0"></i>
+      <span>This tool is for <strong>educational purposes only</strong> and does not constitute medical advice. Always consult a licensed healthcare professional for any health concerns. The predictions provided by this platform are estimates based on statistical patterns and should not be used as a substitute for professional medical diagnosis or treatment.</span>
+    </div>
+
+    <!-- Copyright -->
+    <div class="footer-bottom">
+      <span>&copy; {{ now().year }} HeartPredict. Built with the UCI Heart Disease Dataset.</span>
+      <span class="footer-bottom-divider">|</span>
+      <span>Gradient Boosting &middot; SHAP &middot; Mistral AI</span>
+      <span class="footer-bottom-divider">|</span>
+      <span class="text-nowrap">Not a medical device</span>
+    </div>
   </div>
 </footer>
 
