@@ -1,0 +1,331 @@
+<style>
+  .rec-item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .rec-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .rec-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .rec-body strong {
+    font-size: 0.9rem;
+  }
+  .rec-body p {
+    margin: 0.1rem 0 0 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+</style>
+
+<div class="card border-0 shadow-sm mt-3" id="recommendations-box">
+  <div class="card-body p-4">
+    <h5 class="fw-bold mb-1">
+      <i class="bi bi-heart-pulse me-2 text-danger"></i>Your Personalized Recommendations
+    </h5>
+    <p class="text-muted small mb-3">
+      Evidence-informed suggestions based on your assessment results.
+      {% if result.risk_level == 'High' or result.risk_level == 'Medium' %}
+        <strong class="text-danger">Please share these with your healthcare provider.</strong>
+      {% endif %}
+    </p>
+
+    <div class="d-flex flex-column">
+
+      {# ── Blood Pressure ── #}
+      {% if inputs.get('trestbps') %}
+        {% set bp = inputs['trestbps']|float %}
+        {% if bp >= 140 %}
+          {% set bp_color = 'danger' %}
+          {% set bp_icon = 'exclamation-triangle-fill' %}
+          {% set bp_msg = 'Your resting blood pressure of ' ~ bp ~ ' mm Hg is in Stage 2 hypertension range. This significantly increases strain on your heart and blood vessels.' %}
+          {% set bp_advice = 'Limit sodium to under 1,500 mg/day, eat more potassium-rich foods (bananas, leafy greens), exercise 30 min most days, manage stress, and consult your doctor about a treatment plan.' %}
+        {% elif bp >= 130 %}
+          {% set bp_color = 'warning' %}
+          {% set bp_icon = 'exclamation-triangle-fill' %}
+          {% set bp_msg = 'Your resting blood pressure of ' ~ bp ~ ' mm Hg is in Stage 1 hypertension range.' %}
+          {% set bp_advice = 'Reduce sodium intake, increase physical activity, maintain a healthy weight, and discuss monitoring with your doctor.' %}
+        {% elif bp >= 120 %}
+          {% set bp_color = 'warning' %}
+          {% set bp_icon = 'exclamation-circle-fill' %}
+          {% set bp_msg = 'Your resting blood pressure of ' ~ bp ~ ' mm Hg is elevated (pre-hypertension).' %}
+          {% set bp_advice = 'This is a good time to adopt heart-healthy habits — watch your salt intake, stay active, and keep stress in check before it progresses.' %}
+        {% else %}
+          {% set bp_color = 'success' %}
+          {% set bp_icon = 'check-circle-fill' %}
+          {% set bp_msg = 'Your resting blood pressure of ' ~ bp ~ ' mm Hg is in the normal range.' %}
+          {% set bp_advice = 'Great job! Keep maintaining a balanced diet, regular exercise, and low stress levels to stay in this range.' %}
+        {% endif %}
+        <div class="rec-item bg-{{ bp_color }} bg-opacity-10 border border-{{ bp_color }} border-opacity-25">
+          <div class="rec-icon bg-{{ bp_color }} bg-opacity-10 text-{{ bp_color }}">
+            <i class="bi bi-{{ bp_icon }}"></i>
+          </div>
+          <div class="rec-body">
+            <strong class="text-{{ bp_color }}">Blood Pressure</strong>
+            <p>{{ bp_msg }}</p>
+            <p class="mt-1"><em>{{ bp_advice }}</em></p>
+          </div>
+        </div>
+      {% endif %}
+
+      {# ── Cholesterol ── #}
+      {% if inputs.get('chol') %}
+        {% set chol = inputs['chol']|float %}
+        {% if chol >= 240 %}
+          {% set chol_color = 'danger' %}
+          {% set chol_msg = 'Your cholesterol of ' ~ chol ~ ' mg/dl is high.' %}
+          {% set chol_advice = 'Reduce saturated and trans fats, eat more fiber (oats, beans, vegetables), include omega-3s (fish, walnuts), and speak with your doctor about management options.' %}
+        {% elif chol >= 200 %}
+          {% set chol_color = 'warning' %}
+          {% set chol_msg = 'Your cholesterol of ' ~ chol ~ ' mg/dl is borderline high.' %}
+          {% set chol_advice = 'Focus on a heart-healthy diet — choose lean proteins, whole grains, and healthy fats. A simple swap like olive oil instead of butter can help.' %}
+        {% else %}
+          {% set chol_color = 'success' %}
+          {% set chol_msg = 'Your cholesterol of ' ~ chol ~ ' mg/dl is in the desirable range.' %}
+          {% set chol_advice = 'Excellent! Continue eating a balanced diet rich in fiber and healthy fats to keep your cholesterol levels healthy.' %}
+        {% endif %}
+        <div class="rec-item bg-{{ chol_color }} bg-opacity-10 border border-{{ chol_color }} border-opacity-25">
+          <div class="rec-icon bg-{{ chol_color }} bg-opacity-10 text-{{ chol_color }}">
+            <i class="bi bi-{% if chol_color == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %}"></i>
+          </div>
+          <div class="rec-body">
+            <strong class="text-{{ chol_color }}">Cholesterol</strong>
+            <p>{{ chol_msg }}
+            {%- if chol >= 200 %} Excess LDL cholesterol can build up in artery walls, increasing heart disease risk over time.{% endif %}</p>
+            <p class="mt-1"><em>{{ chol_advice }}</em></p>
+          </div>
+        </div>
+      {% endif %}
+
+      {# ── Fasting Blood Sugar ── #}
+      {% if inputs.get('fbs') %}
+        {% if inputs['fbs'] == 'True' %}
+          {% set fbs_color = 'danger' %}
+          {% set fbs_msg = 'Your fasting blood sugar is elevated (above 120 mg/dl), which may indicate insulin resistance or diabetes.' %}
+          {% set fbs_advice = 'Limit sugary foods and refined carbs, choose whole grains, stay active, and consult your doctor for a proper evaluation and possible HbA1c test.' %}
+        {% else %}
+          {% set fbs_color = 'success' %}
+          {% set fbs_msg = 'Your fasting blood sugar is within a healthy range.' %}
+          {% set fbs_advice = 'Keep up the good work! Continue eating balanced meals with fiber and protein to maintain stable blood sugar levels.' %}
+        {% endif %}
+        <div class="rec-item bg-{{ fbs_color }} bg-opacity-10 border border-{{ fbs_color }} border-opacity-25">
+          <div class="rec-icon bg-{{ fbs_color }} bg-opacity-10 text-{{ fbs_color }}">
+            <i class="bi bi-{% if fbs_color == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %}"></i>
+          </div>
+          <div class="rec-body">
+            <strong class="text-{{ fbs_color }}">Blood Sugar</strong>
+            <p>{{ fbs_msg }}</p>
+            <p class="mt-1"><em>{{ fbs_advice }}</em></p>
+          </div>
+        </div>
+      {% endif %}
+
+      {# ── Max Heart Rate & Exercise ── #}
+      {% if inputs.get('thalch') and inputs.get('age') %}
+        {% set hr = inputs['thalch']|float %}
+        {% set age_val = inputs['age']|float %}
+        {% set predicted_max = 220 - age_val %}
+        {% set hr_pct = (hr / predicted_max * 100)|round %}
+        {% if hr_pct < 70 or inputs.get('exang') == 'True' %}
+          {% set ex_color = 'warning' %}
+          {% set ex_msg = 'Your max heart rate of ' ~ hr ~ ' bpm reaches ' ~ hr_pct ~ '% of the age-predicted maximum.' %}
+          {% if inputs.get('exang') == 'True' %}
+            {% set ex_msg = ex_msg ~ ' You also reported exercise-induced angina, which warrants medical attention.' %}
+            {% set ex_advice = 'Speak with your doctor about safe exercise limits. Gentle activities like walking may be recommended while undergoing evaluation.' %}
+          {% else %}
+            {% set ex_advice = 'Gradually increasing your physical activity — even 20-minute daily walks — can improve your cardiovascular fitness over time.' %}
+          {% endif %}
+        {% elif hr_pct >= 85 %}
+          {% set ex_color = 'success' %}
+          {% set ex_msg = 'Your max heart rate of ' ~ hr ~ ' bpm indicates good exercise capacity.' %}
+          {% set ex_advice = 'Keep up your active lifestyle! Aim for 150 minutes of moderate-intensity exercise per week.' %}
+        {% else %}
+          {% set ex_color = 'success' %}
+          {% set ex_msg = 'Your exercise heart rate response is within expected ranges.' %}
+          {% set ex_advice = 'Stay consistent with physical activity — regular movement is one of the best things you can do for your heart.' %}
+        {% endif %}
+        <div class="rec-item bg-{{ ex_color }} bg-opacity-10 border border-{{ ex_color }} border-opacity-25">
+          <div class="rec-icon bg-{{ ex_color }} bg-opacity-10 text-{{ ex_color }}">
+            <i class="bi bi-{% if ex_color == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %}"></i>
+          </div>
+          <div class="rec-body">
+            <strong class="text-{{ ex_color }}">Exercise Capacity</strong>
+            <p>{{ ex_msg }}</p>
+            <p class="mt-1"><em>{{ ex_advice }}</em></p>
+          </div>
+        </div>
+      {% endif %}
+
+      {# ── Chest Pain ── #}
+      {% if inputs.get('cp') %}
+        {% if inputs['cp'] == 'typical angina' %}
+          {% set cp_color = 'danger' %}
+          {% set cp_msg = 'You reported typical angina — chest discomfort that is strongly associated with reduced blood flow to the heart.' %}
+          {% set cp_advice = 'Please consult a cardiologist promptly. Avoid strenuous activity until you have been evaluated.' %}
+        {% elif inputs['cp'] == 'asymptomatic' %}
+          {% set cp_color = 'info' %}
+          {% set cp_msg = 'You reported no chest pain. While this is common, some heart conditions can progress without noticeable symptoms.' %}
+          {% set cp_advice = 'Continue regular check-ups and listen to your body — any new chest discomfort should be taken seriously.' %}
+        {% else %}
+          {% set cp_color = 'success' %}
+          {% if inputs['cp'] == 'atypical angina' %}
+            {% set cp_msg = 'Your chest pain type (atypical angina) is less commonly linked to heart disease, but should still be monitored.' %}
+            {% set cp_advice = 'Discuss any recurring chest discomfort with your doctor to rule out underlying causes.' %}
+          {% else %}
+            {% set cp_msg = 'Your chest pain type (non-anginal) is typically not related to heart disease.' %}
+            {% set cp_advice = 'If you experience any new or worsening chest symptoms, seek medical advice.' %}
+          {% endif %}
+        {% endif %}
+        <div class="rec-item bg-{{ cp_color }} bg-opacity-10 border border-{{ cp_color }} border-opacity-25">
+          <div class="rec-icon bg-{{ cp_color }} bg-opacity-10 text-{{ cp_color }}">
+            <i class="bi bi-{% if cp_color == 'danger' %}exclamation-triangle-fill{% elif cp_color == 'info' %}info-circle-fill{% else %}check-circle-fill{% endif %}"></i>
+          </div>
+          <div class="rec-body">
+            <strong class="text-{{ cp_color }}">Chest Pain Assessment</strong>
+            <p>{{ cp_msg }}</p>
+            <p class="mt-1"><em>{{ cp_advice }}</em></p>
+          </div>
+        </div>
+      {% endif %}
+
+      {# ── ST Depression (Oldpeak) ── #}
+      {% if inputs.get('oldpeak') %}
+        {% set oldpeak = inputs['oldpeak']|float %}
+        {% if oldpeak > 2 %}
+          {% set op_color = 'danger' %}
+          {% set op_msg = 'Your ST depression level of ' ~ oldpeak ~ ' is elevated, which may indicate reduced blood flow to the heart during stress.' %}
+          {% set op_advice = 'This finding warrants a thorough cardiac evaluation. Please consult your healthcare provider.' %}
+        {% elif oldpeak > 1 %}
+          {% set op_color = 'warning' %}
+          {% set op_msg = 'Your ST depression level of ' ~ oldpeak ~ ' is mildly elevated.' %}
+          {% set op_advice = 'Discuss this result with your doctor. A stress test or other cardiac imaging may provide more information.' %}
+        {% else %}
+          {% set op_color = 'success' %}
+          {% set op_msg = 'Your ST depression level of ' ~ oldpeak ~ ' is within the normal range.' %}
+          {% set op_advice = 'This is a good sign. Continue your regular health maintenance routines.' %}
+        {% endif %}
+        <div class="rec-item bg-{{ op_color }} bg-opacity-10 border border-{{ op_color }} border-opacity-25">
+          <div class="rec-icon bg-{{ op_color }} bg-opacity-10 text-{{ op_color }}">
+            <i class="bi bi-{% if op_color == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %}"></i>
+          </div>
+          <div class="rec-body">
+            <strong class="text-{{ op_color }}">Stress Indicator (ST Depression)</strong>
+            <p>{{ op_msg }}</p>
+            <p class="mt-1"><em>{{ op_advice }}</em></p>
+          </div>
+        </div>
+      {% endif %}
+
+      {# ── Age Consideration ── #}
+      {% if inputs.get('age') %}
+        {% set age_val = inputs['age']|float %}
+        {% if age_val >= 65 %}
+          {% set age_color = 'warning' %}
+          {% set age_msg = 'At ' ~ age_val|int ~ ' years, regular cardiovascular monitoring becomes increasingly important.' %}
+          {% set age_advice = 'Schedule annual heart health check-ups, stay physically active with low-impact exercises (walking, swimming), and maintain social connections for overall well-being.' %}
+        {% elif age_val >= 55 %}
+          {% set age_color = 'info' %}
+          {% set age_msg = 'At ' ~ age_val|int ~ ' years, your heart disease risk naturally increases with age.' %}
+          {% set age_advice = 'Stay proactive — monitor your blood pressure and cholesterol regularly, and keep up with moderate exercise.' %}
+        {% elif age_val >= 40 %}
+          {% set age_color = 'info' %}
+          {% set age_msg = 'At ' ~ age_val|int ~ ' years, early preventive habits can significantly reduce your long-term risk.' %}
+          {% set age_advice = 'This is the ideal time to establish solid heart-healthy routines — regular exercise, balanced diet, and annual check-ups.' %}
+        {% else %}
+          {% set age_color = 'success' %}
+          {% set age_msg = 'At ' ~ age_val|int ~ ' years, building healthy habits now sets the foundation for a lifetime of heart health.' %}
+          {% set age_advice = 'Stay active, eat well, avoid smoking, and limit alcohol. The habits you form now have lasting benefits.' %}
+        {% endif %}
+        <div class="rec-item bg-{{ age_color }} bg-opacity-10 border border-{{ age_color }} border-opacity-25">
+          <div class="rec-icon bg-{{ age_color }} bg-opacity-10 text-{{ age_color }}">
+            <i class="bi bi-calendar-heart-fill"></i>
+          </div>
+          <div class="rec-body">
+            <strong class="text-{{ age_color }}">Age Consideration</strong>
+            <p>{{ age_msg }}</p>
+            <p class="mt-1"><em>{{ age_advice }}</em></p>
+          </div>
+        </div>
+      {% endif %}
+
+      {# ── Major Vessels ── #}
+      {% if inputs.get('ca') %}
+        {% set ca_val = inputs['ca']|float %}
+        {% if ca_val > 0 %}
+          {% set ca_color = 'warning' %}
+          {% set ca_msg = 'Your assessment indicates ' ~ ca_val|int ~ ' major vessel(s) with visible narrowing.' %}
+          {% set ca_advice = 'This is a significant finding. Please consult a cardiologist for further evaluation and discuss possible treatment options.' %}
+        {% else %}
+          {% set ca_color = 'success' %}
+          {% set ca_msg = 'No major vessel narrowing detected.' %}
+          {% set ca_advice = 'This is reassuring. Keep maintaining a heart-healthy lifestyle to preserve this.' %}
+        {% endif %}
+        <div class="rec-item bg-{{ ca_color }} bg-opacity-10 border border-{{ ca_color }} border-opacity-25">
+          <div class="rec-icon bg-{{ ca_color }} bg-opacity-10 text-{{ ca_color }}">
+            <i class="bi bi-{% if ca_color == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %}"></i>
+          </div>
+          <div class="rec-body">
+            <strong class="text-{{ ca_color }}">Coronary Vessels</strong>
+            <p>{{ ca_msg }}</p>
+            <p class="mt-1"><em>{{ ca_advice }}</em></p>
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+
+    {# ── General Lifestyle Summary ── #}
+    <div class="mt-3 p-3 rounded" style="background: #f8f9fa;">
+      <h6 class="fw-bold mb-2"><i class="bi bi-lightbulb-fill text-warning me-1"></i> General Heart Health Tips</h6>
+      <ul class="small mb-0" style="line-height:1.8;">
+        <li><strong>Diet:</strong> Eat plenty of vegetables, fruits, whole grains, and lean proteins. Limit processed foods, salt, and added sugars.</li>
+        <li><strong>Exercise:</strong> Aim for at least 150 minutes of moderate activity (brisk walking, cycling) per week.</li>
+        <li><strong>Sleep:</strong> Prioritize 7–9 hours of quality sleep per night — poor sleep is linked to higher heart disease risk.</li>
+        <li><strong>Stress:</strong> Practice mindfulness, deep breathing, or hobbies that help you unwind. Chronic stress raises blood pressure and inflammation.</li>
+        {% if inputs.get('sex') and inputs['sex'] == 'Male' %}
+        <li><strong>Smoking:</strong> If you smoke, consider quitting — it is the single most impactful step you can take for your heart.</li>
+        {% else %}
+        <li><strong>Smoking:</strong> If you smoke, consider quitting — smoking significantly increases heart disease risk regardless of gender.</li>
+        {% endif %}
+        <li><strong>Alcohol:</strong> Limit to moderate levels (1 drink/day for women, 2 for men) or avoid entirely for best heart health.</li>
+      </ul>
+    </div>
+
+    {# ── Closing message based on risk level ── #}
+    <div class="mt-3 p-3 rounded text-center
+      {% if result.risk_level == 'Low' %}bg-success bg-opacity-10 border border-success border-opacity-25
+      {% elif result.risk_level == 'Medium' %}bg-warning bg-opacity-10 border border-warning border-opacity-25
+      {% else %}bg-danger bg-opacity-10 border border-danger border-opacity-25{% endif %}">
+      <p class="mb-0 fw-semibold small">
+        {% if result.risk_level == 'Low' %}
+          <i class="bi bi-emoji-smile text-success me-1"></i>
+          Your results are encouraging. Keep prioritizing your heart health — small daily choices add up to big benefits over time.
+        {% elif result.risk_level == 'Medium' %}
+          <i class="bi bi-emoji-neutral text-warning me-1"></i>
+          Some areas need attention. Use these recommendations as a starting point and consider scheduling a check-up with your doctor.
+        {% else %}
+          <i class="bi bi-emoji-frown text-danger me-1"></i>
+          These results suggest significant risk factors are present. Please consult a healthcare professional promptly for a comprehensive cardiac evaluation.
+        {% endif %}
+      </p>
+    </div>
+
+    <div class="mt-2 text-center">
+      <small class="text-muted">
+        <i class="bi bi-info-circle me-1"></i>
+        These recommendations are for <strong>educational purposes only</strong> and are not a substitute for professional medical advice, diagnosis, or treatment.
+      </small>
+    </div>
+
+  </div>
+</div>
