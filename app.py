@@ -294,9 +294,11 @@ def predict():
         pred  = int(model.predict(X)[0])
         proba = float(model.predict_proba(X)[0][1])
     except Exception as exc:
-        err = {"error": str(exc)}
         if request.is_json:
-            return jsonify(err), 400
+            return jsonify({"error": str(exc)}), 400
+        is_htmx = request.headers.get("HX-Request") == "true"
+        if is_htmx:
+            return render_template("_error.html", message=f"Prediction error: {exc}"), 422
         flash(f"Prediction error: {exc}", "danger")
         return redirect(url_for("predict"))
 
@@ -308,8 +310,14 @@ def predict():
     except Exception:
         pass
 
+    try:
+        current_user_id = current_user.id if current_user.is_authenticated else None
+    except Exception:
+        db.session.rollback()
+        current_user_id = None
+
     record = Prediction(
-        user_id     = current_user.id if current_user.is_authenticated else None,
+        user_id     = current_user_id,
         input_data  = json.dumps(data),
         prediction  = pred,
         probability = proba,
@@ -384,6 +392,8 @@ def inject_now():
 def unauthorized(e):
     if request.is_json:
         return jsonify({"error": "Authentication required"}), 401
+    if request.headers.get("HX-Request") == "true":
+        return "", 204, {"HX-Redirect": url_for("auth.login", next=request.path)}
     flash("Please log in to access this page.", "warning")
     return redirect(url_for("auth.login"))
 

@@ -42,18 +42,10 @@
       "non-anginal",
       "typical angina"
     ],
-    "fbs": [
-      "False",
-      "True"
-    ],
     "restecg": [
       "lv hypertrophy",
       "normal",
       "st-t abnormality"
-    ],
-    "exang": [
-      "False",
-      "True"
     ],
     "slope": [
       "downsloping",
@@ -64,10 +56,18 @@
       "fixed defect",
       "normal",
       "reversable defect"
+    ],
+    "fbs": [
+      "False",
+      "True"
+    ],
+    "exang": [
+      "False",
+      "True"
     ]
   },
   "metrics": {
     "f1_score": 0.872,
-    "roc_auc": 0.9173
+    "roc_auc": 0.9222
   }
 }

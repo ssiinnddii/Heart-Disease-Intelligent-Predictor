@@ -156,7 +156,7 @@
     </div>
   </div>
 
-  <form
+  <form method="post" action="{{ url_for('predict') }}"
     hx-post="{{ url_for('predict') }}"
     hx-target="#result-box"
     hx-swap="innerHTML"
@@ -295,7 +295,7 @@
             </select>
           </div>
           <div class="col-md-6">
-            <label class="form-label" for="thal">Thalassemia Type <span class="text-danger">*</span></label>
+            <label class="form-label" for="thal">Myocardial Perfusion Scan Result <span class="text-danger">*</span></label>
             <select class="form-select" id="thal" name="thal" required>
               <option value="" disabled selected>Choose…</option>
               {% for opt in meta.categories.thal %}

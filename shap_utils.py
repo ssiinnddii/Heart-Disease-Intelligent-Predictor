@@ -113,7 +113,7 @@ def compute_shap_explanation(pipeline, X, meta):
     try:
         explainer = get_explainer(pipeline)
 
-        X_scaled = pipeline.named_steps.get("standardscaler", None)
+        X_scaled = pipeline.named_steps.get("scaler", None)
         if X_scaled is not None:
             X_for_shap = X_scaled.transform(X)
         else:
@@ -171,7 +171,7 @@ def _humanize_feature_name(feat, info, X, idx, categories):
         "oldpeak": "ST Depression (Oldpeak)",
         "slope": "ST Slope",
         "ca": "Major Vessels (CA)",
-        "thal": "Thalassemia",
+        "thal": "Myocardial Perfusion Scan",
     }
 
     base_name = friendly_names.get(feat, feat.title())

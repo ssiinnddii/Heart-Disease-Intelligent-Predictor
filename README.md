@@ -45,43 +45,51 @@ An AI-powered web application that predicts heart disease risk using clinical he
 
 ```
 Heart-Disease-Intelligent-Predictor/
+├── .env                        # Environment variables (MISTRAL_API_KEY, SECRET_KEY)
+├── .gitignore                  # Git ignore rules
 ├── app.py                      # Main Flask application, routes, model loading
 ├── assistant_engine.py         # Mistral AI-powered chatbot response engine
 ├── assistant_routes.py         # Chatbot API blueprint with session history
 ├── auth.py                     # Flask-Login setup, password hashing
 ├── auth_routes.py              # Login, register, logout routes
+├── check_model.py              # Model validation/evaluation script
 ├── dashboard_routes.py         # User/Doctor/Admin dashboards, analytics, notes
 ├── decorators.py               # Role-based access decorators
 ├── models.py                   # SQLAlchemy models (User, Prediction, PredictionNote)
-├── shap_utils.py               # SHAP computation and explanation utilities
-├── seed_admin.py               # Script to create initial admin user
 ├── migrate_add_user_id.py      # Database migration script
+├── seed_admin.py               # Script to create initial admin user
+├── shap_utils.py               # SHAP computation and explanation utilities
+├── test_shap.py                # SHAP explanation test script
 ├── heart_disease_uci.csv       # UCI Heart Disease dataset
 ├── models/
 │   ├── heart_disease_model.pkl # Trained ML model (pipeline + classifier)
 │   └── meta.json               # Feature metadata (names, categories, metrics)
-├── templates/
-│   ├── base.html               # Base layout with navigation
-│   ├── index.html              # Landing page with heart health info and news
-│   ├── predict.html            # Assessment form (HTMX-powered)
-│   ├── result.html             # Full-page result view
-│   ├── history.html            # Prediction history table
-│   ├── about.html              # Model information page
-│   ├── _prediction_detail.html # Modal content for assessment details + notes
-│   ├── _result_card.html       # Risk banner and probability bar
-│   ├── _result_content.html    # HTMX-injected result (no base template)
-│   ├── _shap_explanation.html  # Feature impact bar chart
-│   ├── auth/
-│   │   ├── login.html
-│   │   └── register.html
-│   └── dashboard/
-│       ├── user_dashboard.html
-│       ├── doctor_dashboard.html
-│       ├── admin_dashboard.html
-│       ├── patient_profile.html
-│       └── analytics.html
-└── static/
-    └── images/
+├── static/
+│   └── images/
+│       └── heart-bg.png
+└── templates/
+    ├── base.html               # Base layout with navigation
+    ├── index.html              # Landing page with heart health info and news
+    ├── predict.html            # Assessment form (HTMX-powered)
+    ├── result.html             # Full-page result view
+    ├── history.html            # Prediction history table
+    ├── about.html              # Model information page
+    ├── assistant.html          # Chatbot assistant page
+    ├── _error.html             # HTMX error partial
+    ├── _prediction_detail.html # Modal content for assessment details + notes
+    ├── _recommendations.html   # Health recommendations partial
+    ├── _result_card.html       # Risk banner and probability bar
+    ├── _result_content.html    # HTMX-injected result (no base template)
+    ├── _shap_explanation.html  # Feature impact bar chart
+    ├── auth/
+    │   ├── login.html
+    │   └── register.html
+    └── dashboard/
+        ├── user_dashboard.html
+        ├── doctor_dashboard.html
+        ├── admin_dashboard.html
+        ├── patient_profile.html
+        └── analytics.html
 ```
 
 ## Models & Data
@@ -94,7 +102,7 @@ Heart-Disease-Intelligent-Predictor/
 | `email` | String(120) | Unique email |
 | `password_hash` | String(256) | PBKDF2-SHA256 hash |
 | `role` | String(20) | `user`, `doctor`, or `admin` |
-| `status` | String(20) | `active`, `pending`, `approved`, `rejected` |
+| `status` | String(20) | `active`, `pending`, `approved`, `rejected`, `inactive` |
 | `created_at` | DateTime | Registration timestamp |
 | `approved_at` | DateTime | Doctor approval timestamp |
 
@@ -162,27 +170,25 @@ pip install -r requirements.txt
 
 3. Configure environment variables:
 ```bash
-# Copy the example .env file and edit with your settings
-# Make sure MISTRAL_API_KEY is set (already provided in .env)
+# Create a .env file in the project root with the following:
+MISTRAL_API_KEY=your_mistral_api_key
+SECRET_KEY=your_secret_key_here
 ```
+Get a Mistral API key from [console.mistral.ai](https://console.mistral.ai).
 
-3. Run the admin seed script (first time only):
+4. Run the admin seed script (first time only):
 ```bash
 python seed_admin.py
 ```
 
-4. Start the application:
+5. Start the application:
 ```bash
 python app.py
 ```
 
-5. Open your browser to `http://localhost:5000`
+6. Open your browser to `http://localhost:5000`
 
-### Default Admin Credentials
-- **Email:** admin@heartpredict.com
-- **Password:** Admin@123
-
-Change these immediately after first login.
+**Note:** After running `seed_admin.py`, the default admin credentials will be printed to the console. Change the password immediately after first login.
 
 ### Risk Levels
 | Level | Probability | Description |

@@ -2,109 +2,256 @@
 {% block title %}HeartPredict – About{% endblock %}
 
 {% block content %}
-<div class="container py-5" style="max-width:820px">
+<div class="container py-5" style="max-width:900px">
 
-  <h2 class="fw-bold mb-1">
-    <i class="bi bi-info-circle text-primary me-2"></i>About This Project
-  </h2>
-  <p class="text-muted mb-5">
-    How the model was built, what tech powers the site, and what each feature means.
-  </p>
-
-  <!-- Model card -->
-  <div class="card mb-4 p-4">
-    <h4 class="fw-bold mb-3">🤖 Machine Learning Pipeline</h4>
-    <p>
-      The model is a <strong>scikit-learn Pipeline</strong> that chains preprocessing
-      and classification into a single, serialisable object.  Using a Pipeline means
-      the exact same transformations applied during training are automatically applied
-      at inference time – preventing data leakage and keeping training and serving
-      consistent.
+  <div class="text-center mb-5" data-aos="fade-up">
+    <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle p-3 mb-3" style="width:72px;height:72px;">
+      <i class="bi bi-heart-pulse-fill text-primary fs-2"></i>
+    </div>
+    <h1 class="fw-bold display-6 mb-2">About This Project</h1>
+    <p class="text-muted fs-5" style="max-width:600px;margin:0 auto;">
+      How the model works, what technology powers the app, and what each clinical feature means.
     </p>
+  </div>
 
-    <div class="row g-3 mt-1">
-      <div class="col-md-4">
-        <div class="bg-light rounded p-3">
-          <div class="fw-semibold mb-1">Step 1 – Numeric preprocessing</div>
-          <small class="text-muted">
-            Median imputation (for missing values) → Standard scaling (mean=0, std=1)
-          </small>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="bg-light rounded p-3">
-          <div class="fw-semibold mb-1">Step 2 – Categorical preprocessing</div>
-          <small class="text-muted">
-            Mode imputation → Ordinal encoding (safe for tree models)
-          </small>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="bg-light rounded p-3">
-          <div class="fw-semibold mb-1">Step 3 – Gradient Boosting</div>
-          <small class="text-muted">
-            100 estimators, random_state=42.  Best F1 across 6 tested algorithms.
-          </small>
-        </div>
-      </div>
-    </div>
+  <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+    <div class="card-body p-4 p-lg-5">
+      <h4 class="fw-bold mb-3">
+        <i class="bi bi-cpu text-primary me-2"></i>Machine Learning Pipeline
+      </h4>
+      <p class="text-muted mb-4">
+        The model is a <strong class="text-dark">scikit-learn Pipeline</strong> that chains preprocessing
+        and classification into a single serialisable object. Using a Pipeline ensures the
+        exact same transformations applied during training are automatically applied at inference time —
+        preventing data leakage and keeping training and serving consistent.
+      </p>
 
-    <div class="mt-3 d-flex gap-3 flex-wrap">
-      <span class="badge bg-primary fs-6">F1-Score: {{ meta.metrics.f1_score }}</span>
-      <span class="badge bg-secondary fs-6">ROC-AUC: {{ meta.metrics.roc_auc }}</span>
-      <span class="badge bg-dark fs-6">920 training samples</span>
+      <div class="row g-3 mt-1 mb-4">
+        <div class="col-md-4">
+          <div class="bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge bg-primary rounded-pill">1</span>
+              <span class="fw-semibold">Numeric Preprocessing</span>
+            </div>
+            <small class="text-muted d-block">Median imputation for missing values → Standard scaling (mean=0, std=1)</small>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="bg-success bg-opacity-10 border border-success border-opacity-25 rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge bg-success rounded-pill">2</span>
+              <span class="fw-semibold">Categorical Preprocessing</span>
+            </div>
+            <small class="text-muted d-block">Mode imputation → Ordinal encoding (safe for tree-based models)</small>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="bg-dark bg-opacity-10 border border-dark border-opacity-25 rounded-3 p-3 h-100">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge bg-dark rounded-pill">3</span>
+              <span class="fw-semibold">Gradient Boosting</span>
+            </div>
+            <small class="text-muted d-block">100 estimators, random_state=42. Best F1 across 7 tested algorithms.</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-light rounded-3 p-4">
+        <h5 class="fw-semibold mb-3">
+          <i class="bi bi-bar-chart-line text-primary me-1"></i>Model Performance
+        </h5>
+        <div class="row g-3">
+          <div class="col-sm-4">
+            <div class="text-center p-3 bg-white rounded-3 shadow-sm">
+              <div class="text-primary fw-bold fs-3 mb-1">{{ meta.metrics.f1_score }}</div>
+              <div class="text-muted small">F1 Score</div>
+              <div class="progress mt-2" style="height:6px;">
+                <div class="progress-bar bg-primary" role="progressbar" style="width:{{ (meta.metrics.f1_score * 100)|round }}%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="text-center p-3 bg-white rounded-3 shadow-sm">
+              <div class="text-success fw-bold fs-3 mb-1">{{ meta.metrics.roc_auc }}</div>
+              <div class="text-muted small">ROC-AUC</div>
+              <div class="progress mt-2" style="height:6px;">
+                <div class="progress-bar bg-success" role="progressbar" style="width:{{ (meta.metrics.roc_auc * 100)|round }}%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="text-center p-3 bg-white rounded-3 shadow-sm">
+              <div class="text-dark fw-bold fs-3 mb-1">920</div>
+              <div class="text-muted small">Training Samples</div>
+              <div class="progress mt-2" style="height:6px;">
+                <div class="progress-bar bg-dark" role="progressbar" style="width:92%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-muted small mt-3 mb-0">
+          <i class="bi bi-database me-1"></i>
+          Trained on the <strong>UCI Heart Disease dataset</strong> (Cleveland, Hungarian, Swiss, and VA subsets combined).
+        </p>
+      </div>
     </div>
   </div>
 
-  <!-- Tech stack -->
-  <div class="card mb-4 p-4">
-    <h4 class="fw-bold mb-3">🛠 Tech Stack</h4>
-    <div class="row g-3">
-      <div class="col-md-6">
-        <h6 class="fw-semibold text-muted text-uppercase small">Backend / ML</h6>
-        <ul class="list-unstyled">
-          <li><i class="bi bi-check-circle text-success me-2"></i>Python 3.11+</li>
-          <li><i class="bi bi-check-circle text-success me-2"></i>scikit-learn Pipeline (preprocessing + model)</li>
-          <li><i class="bi bi-check-circle text-success me-2"></i>Flask (routes + Jinja2 templates)</li>
-          <li><i class="bi bi-check-circle text-success me-2"></i>SQLAlchemy + SQLite (prediction history)</li>
-          <li><i class="bi bi-check-circle text-success me-2"></i>joblib (model persistence)</li>
-        </ul>
-      </div>
-      <div class="col-md-6">
-        <h6 class="fw-semibold text-muted text-uppercase small">Frontend</h6>
-        <ul class="list-unstyled">
-          <li><i class="bi bi-check-circle text-success me-2"></i>Bootstrap 5 (responsive UI)</li>
-          <li><i class="bi bi-check-circle text-success me-2"></i>HTMX (dynamic form submit, no SPA needed)</li>
-          <li><i class="bi bi-check-circle text-success me-2"></i>Bootstrap Icons</li>
-        </ul>
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4 p-lg-5">
+      <h4 class="fw-bold mb-4">
+        <i class="bi bi-stack text-primary me-2"></i>Technology Stack
+      </h4>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="bg-light rounded-3 p-3">
+            <h6 class="fw-bold text-muted text-uppercase small mb-3">
+              <i class="bi bi-server me-1"></i>Backend & ML
+            </h6>
+            <ul class="list-unstyled mb-0">
+              <li class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                <span>Python 3.11+</span>
+              </li>
+              <li class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                <span>scikit-learn Pipeline with Gradient Boosting</span>
+              </li>
+              <li class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                <span>Flask (routes + Jinja2 templates)</span>
+              </li>
+              <li class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                <span>SQLAlchemy + SQLite (prediction history)</span>
+              </li>
+              <li class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                <span>joblib (model persistence)</span>
+              </li>
+              <li class="d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill text-success flex-shrink-0"></i>
+                <span>SHAP (TreeExplainer for interpretability)</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="bg-light rounded-3 p-3">
+            <h6 class="fw-bold text-muted text-uppercase small mb-3">
+              <i class="bi bi-window me-1"></i>Frontend
+            </h6>
+            <ul class="list-unstyled mb-0">
+              <li class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-check-circle-fill text-primary flex-shrink-0"></i>
+                <span>Bootstrap 5 (responsive UI)</span>
+              </li>
+              <li class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-check-circle-fill text-primary flex-shrink-0"></i>
+                <span>HTMX (dynamic form submissions)</span>
+              </li>
+              <li class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-check-circle-fill text-primary flex-shrink-0"></i>
+                <span>Chart.js 4 (analytics dashboard)</span>
+              </li>
+              <li class="d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill text-primary flex-shrink-0"></i>
+                <span>Bootstrap Icons</span>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Feature glossary -->
-  <div class="card p-4">
-    <h4 class="fw-bold mb-3">📋 Feature Glossary</h4>
-    <div class="table-responsive">
-      <table class="table table-sm table-striped">
-        <thead class="table-light">
-          <tr><th>Feature</th><th>Description</th><th>Type</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><code>age</code></td><td>Age in years</td><td>Numeric</td></tr>
-          <tr><td><code>sex</code></td><td>Biological sex (Male / Female)</td><td>Categorical</td></tr>
-          <tr><td><code>cp</code></td><td>Chest pain type (asymptomatic, typical angina, atypical angina, non-anginal)</td><td>Categorical</td></tr>
-          <tr><td><code>trestbps</code></td><td>Resting blood pressure (mm Hg)</td><td>Numeric</td></tr>
-          <tr><td><code>chol</code></td><td>Serum cholesterol (mg/dl)</td><td>Numeric</td></tr>
-          <tr><td><code>fbs</code></td><td>Fasting blood sugar &gt; 120 mg/dl (True/False)</td><td>Categorical</td></tr>
-          <tr><td><code>restecg</code></td><td>Resting ECG results</td><td>Categorical</td></tr>
-          <tr><td><code>thalch</code></td><td>Maximum heart rate achieved (bpm)</td><td>Numeric</td></tr>
-          <tr><td><code>exang</code></td><td>Exercise-induced angina (True/False)</td><td>Categorical</td></tr>
-          <tr><td><code>oldpeak</code></td><td>ST depression induced by exercise relative to rest</td><td>Numeric</td></tr>
-          <tr><td><code>slope</code></td><td>Slope of peak exercise ST segment (upsloping / flat / downsloping)</td><td>Categorical</td></tr>
-          <tr><td><code>ca</code></td><td>Number of major vessels coloured by fluoroscopy (0–3)</td><td>Numeric</td></tr>
-          <tr><td><code>thal</code></td><td>Thalassemia (normal / fixed defect / reversable defect)</td><td>Categorical</td></tr>
-        </tbody>
-      </table>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4 p-lg-5">
+      <h4 class="fw-bold mb-3">
+        <i class="bi bi-journal-text text-primary me-2"></i>Feature Glossary
+      </h4>
+      <p class="text-muted mb-4">
+        The model uses <strong>13 clinical features</strong> to assess heart disease risk.
+        These are the same measurements a doctor would review during a cardiac evaluation.
+      </p>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-primary">
+            <tr>
+              <th style="width:20%;">Feature</th>
+              <th style="width:50%;">Description</th>
+              <th style="width:30%;">Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="text-primary fw-semibold">age</code></td>
+              <td>Age in years</td>
+              <td><span class="badge bg-info bg-opacity-10 text-info">Numeric</span></td>
+            </tr>
+            <tr>
+              <td><code class="text-primary fw-semibold">sex</code></td>
+              <td>Biological sex (Male / Female)</td>
+              <td><span class="badge bg-success bg-opacity-10 text-success">Categorical</span></td>
+            </tr>
+            <tr>
+              <td><code class="text-primary fw-semibold">cp</code></td>
+              <td>Chest pain type — asymptomatic, typical angina, atypical angina, non-anginal</td>
+              <td><span class="badge bg-success bg-opacity-10 text-success">Categorical</span></td>
+            </tr>
+            <tr>
+              <td><code class="text-primary fw-semibold">trestbps</code></td>
+              <td>Resting blood pressure (mm Hg)</td>
+              <td><span class="badge bg-info bg-opacity-10 text-info">Numeric</span></td>
+            </tr>
+            <tr>
+              <td><code class="text-primary fw-semibold">chol</code></td>
+              <td>Serum cholesterol (mg/dl)</td>
+              <td><span class="badge bg-info bg-opacity-10 text-info">Numeric</span></td>
+            </tr>
+            <tr>
+              <td><code class="text-primary fw-semibold">fbs</code></td>
+              <td>Fasting blood sugar &gt; 120 mg/dl (True / False)</td>
+              <td><span class="badge bg-success bg-opacity-10 text-success">Categorical</span></td>
+            </tr>
+            <tr>
+              <td><code class="text-primary fw-semibold">restecg</code></td>
+              <td>Resting electrocardiographic results</td>
+              <td><span class="badge bg-success bg-opacity-10 text-success">Categorical</span></td>
+            </tr>
+            <tr>
+              <td><code class="text-primary fw-semibold">thalch</code></td>
+              <td>Maximum heart rate achieved (bpm)</td>
+              <td><span class="badge bg-info bg-opacity-10 text-info">Numeric</span></td>
+            </tr>
+            <tr>
+              <td><code class="text-primary fw-semibold">exang</code></td>
+              <td>Exercise-induced angina (True / False)</td>
+              <td><span class="badge bg-success bg-opacity-10 text-success">Categorical</span></td>
+            </tr>
+            <tr>
+              <td><code class="text-primary fw-semibold">oldpeak</code></td>
+              <td>ST depression induced by exercise relative to rest</td>
+              <td><span class="badge bg-info bg-opacity-10 text-info">Numeric</span></td>
+            </tr>
+            <tr>
+              <td><code class="text-primary fw-semibold">slope</code></td>
+              <td>Slope of peak exercise ST segment (upsloping / flat / downsloping)</td>
+              <td><span class="badge bg-success bg-opacity-10 text-success">Categorical</span></td>
+            </tr>
+            <tr>
+              <td><code class="text-primary fw-semibold">ca</code></td>
+              <td>Number of major vessels coloured by fluoroscopy (0–3)</td>
+              <td><span class="badge bg-info bg-opacity-10 text-info">Numeric</span></td>
+            </tr>
+            <tr>
+              <td><code class="text-primary fw-semibold">thal</code></td>
+              <td>Myocardial Perfusion Scan result (normal / fixed defect / reversable defect)</td>
+              <td><span class="badge bg-success bg-opacity-10 text-success">Categorical</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
